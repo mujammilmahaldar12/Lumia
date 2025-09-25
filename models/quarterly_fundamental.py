@@ -1,6 +1,7 @@
 # app/models/quarterly_fundamental.py
 from sqlalchemy import Column, Integer, Float, Date, BigInteger, ForeignKey, UniqueConstraint
-from app.database import Base
+from database import Base
+
 
 class QuarterlyFundamental(Base):
     __tablename__ = "quarterly_fundamentals"

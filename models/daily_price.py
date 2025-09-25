@@ -1,7 +1,7 @@
 # app/models/daily_price.py
 from sqlalchemy import Column, Integer, String, Float, Date, BigInteger, TIMESTAMP, ForeignKey, UniqueConstraint
 from sqlalchemy.sql import func
-from app.database import Base
+from database import Base
 
 class DailyPrice(Base):
     __tablename__ = "daily_prices"

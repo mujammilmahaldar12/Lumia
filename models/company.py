@@ -1,7 +1,7 @@
 # app/models/company.py
 from sqlalchemy import Column, Integer, String, BigInteger, Text, TIMESTAMP
 from sqlalchemy.sql import func
-from app.database import Base
+from database import Base
 
 class Company(Base):
     __tablename__ = "companies"

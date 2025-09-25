@@ -1,9 +1,5 @@
 from logging.config import fileConfig
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 
-from database import Base
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
@@ -20,8 +16,12 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
+from database import Base
+from models.user import User
+from models.company import Company
+from models.daily_price import DailyPrice
+from models.quarterly_fundamental import QuarterlyFundamental
+
 target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -42,20 +42,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    import os
-    from sqlalchemy import engine_from_config, pool
-    from alembic import context
-    from models.base import Base  # assuming you created Base in models/base.py
-
-    DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:myotic143@localhost/lumia")
-
-    def run_migrations_online() -> None:
-        connectable = create_engine(DATABASE_URL, poolclass=pool.NullPool)
-        with connectable.connect() as connection:
-            context.configure(connection=connection, target_metadata=Base.metadata)
-            with context.begin_transaction():
-                context.run_migrations()
-
+    url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
