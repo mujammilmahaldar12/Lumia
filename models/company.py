@@ -1,13 +1,16 @@
-# app/models/company.py
+# app/models/company.py - Legacy model, use Asset instead
 from sqlalchemy import Column, Integer, String, BigInteger, Text, TIMESTAMP
 from sqlalchemy.sql import func
 from database import Base
+
+# NOTE: This model is kept for backward compatibility
+# New code should use the Asset model instead
 
 class Company(Base):
     __tablename__ = "companies"
     
     id = Column(Integer, primary_key=True, index=True)
-    symbol = Column(String(10), unique=True, nullable=False)
+    symbol = Column(String(20), unique=True, nullable=False)
     company_name = Column(String(255), nullable=False)
     sector = Column(String(100))
     industry = Column(String(100))

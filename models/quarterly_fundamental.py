@@ -1,5 +1,6 @@
 # app/models/quarterly_fundamental.py
 from sqlalchemy import Column, Integer, Float, Date, BigInteger, ForeignKey, UniqueConstraint
+from sqlalchemy.orm import relationship
 from database import Base
 
 
@@ -7,7 +8,7 @@ class QuarterlyFundamental(Base):
     __tablename__ = "quarterly_fundamentals"
     
     id = Column(Integer, primary_key=True, index=True)
-    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
+    asset_id = Column(Integer, ForeignKey("assets.id"), nullable=False)
     report_date = Column(Date, nullable=False)
     earnings_per_share = Column(Float)
     price_to_earnings_ratio = Column(Float)
@@ -16,4 +17,7 @@ class QuarterlyFundamental(Base):
     total_debt = Column(BigInteger)
     return_on_equity = Column(Float)
 
-    __table_args__ = (UniqueConstraint("company_id", "report_date", name="uix_company_report"),)
+    # Relationship to Asset
+    asset = relationship("Asset", back_populates="quarterly_fundamentals")
+
+    __table_args__ = (UniqueConstraint("asset_id", "report_date", name="uix_asset_report"),)

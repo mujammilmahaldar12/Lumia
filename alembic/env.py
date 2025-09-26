@@ -19,6 +19,7 @@ if config.config_file_name is not None:
 from database import Base
 from models.user import User
 from models.company import Company
+from models.assets import Asset
 from models.daily_price import DailyPrice
 from models.quarterly_fundamental import QuarterlyFundamental
 
