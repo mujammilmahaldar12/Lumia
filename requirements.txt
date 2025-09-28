@@ -1,6 +1,76 @@
-yfinance 
-pandas
-python-dotenv
-psycopg2-binary
-alembic
-sqlalchemy
+# Core framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+
+# News collection requirements
+requests>=2.32.0
+beautifulsoup4>=4.13.0
+lxml>=5.3.0
+python-dateutil>=2.9.0
+python-dotenv>=1.1.0
+pytz>=2025.2
+
+# Data processing
+pandas>=2.3.0
+numpy>=2.2.0
+
+# Database
+peewee>=3.18.0
+sqlalchemy>=1.4.0
+psycopg2-binary>=2.9.0
+alembic>=1.16.0
+
+# Machine Learning & NLP
+transformers>=4.36.0
+torch>=2.1.0
+nltk>=3.8.1
+scikit-learn>=1.3.0
+
+# Text processing
+rapidfuzz>=3.6.0
+
+# Scheduling
+schedule>=1.2.0
+
+# Scheduling & Automation
+apscheduler>=3.10.4
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+httpx>=0.25.0
+
+# Frontend (optional)
+streamlit>=1.28.0
+plotly>=5.17.0
+pandas>=2.3.0
+
+# Alembic for migrations
+alembic>=1.16.0
+
+# Web scraping
+curl-cffi>=0.13.0
+selenium>=4.15.0
+
+# Social media APIs
+tweepy>=4.14.0
+praw>=7.7.0
+
+# Utilities
+certifi>=2025.8.0
+charset-normalizer>=3.4.0
+idna>=3.10
+
+# AI/ML packages
+transformers>=4.21.0
+torch>=1.12.0
+sentencepiece>=0.1.99
+tokenizers>=0.13.0
+
+# Financial data and NLP
+yfinance>=0.2.18
+alpha-vantage>=2.3.1
+nltk>=3.8.1
+scikit-learn>=1.2.0
+scipy>=1.9.0
