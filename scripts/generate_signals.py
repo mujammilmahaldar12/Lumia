@@ -14,10 +14,14 @@ import logging
 from datetime import datetime, timedelta, date
 from typing import List, Optional
 
-from Lumia.database import get_db
-from Lumia.services.signal_generator import SignalGenerator
-from Lumia.models.company import Company
-from Lumia.models.asset_daily_signals import AssetDailySignals
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from database import get_db
+from app.services.signal_generator import SignalGenerator
+from models.assets import Asset
+from models.asset_daily_signals import AssetDailySignals
 
 
 def setup_logging(verbose: bool = False):
@@ -61,7 +65,7 @@ def generate_signals_for_date(
 ):
     """Generate signals for specific assets and date."""
     db = next(get_db())
-    generator = SignalGenerator(db)
+    generator = SignalGenerator()
     
     try:
         logging.info(f"Generating signals for {len(asset_ids)} assets on {target_date}")
@@ -87,7 +91,7 @@ def generate_signals_for_date(
             try:
                 logging.info(f"Generating signals for asset {asset_id}...")
                 
-                signals = generator.generate_daily_signals(asset_id, target_date)
+                signals = generator.generate_signals_for_date(db, asset_id, target_date)
                 
                 if signals:
                     # Delete existing signals if force is True
@@ -124,7 +128,7 @@ def generate_signals_for_date(
 def backfill_signals(asset_ids: List[int], days: int, force: bool = False):
     """Backfill signals for multiple days."""
     db = next(get_db())
-    generator = SignalGenerator(db)
+    generator = SignalGenerator()
     
     try:
         logging.info(f"Backfilling {days} days of signals for {len(asset_ids)} assets")
@@ -167,7 +171,7 @@ def backfill_signals(asset_ids: List[int], days: int, force: bool = False):
             
             for asset_id in assets_to_process:
                 try:
-                    signals = generator.generate_daily_signals(asset_id, current_date)
+                    signals = generator.generate_signals_for_date(db, asset_id, current_date)
                     
                     if signals:
                         db.add(signals)
@@ -202,7 +206,7 @@ def get_all_asset_ids() -> List[int]:
     db = next(get_db())
     
     try:
-        assets = db.query(Company.id).filter(Company.is_active == True).all()
+        assets = db.query(Asset.id).filter(Asset.is_active == True).all()
         return [asset[0] for asset in assets]
     finally:
         db.close()
@@ -213,12 +217,12 @@ def get_asset_ids_by_symbols(symbols: List[str]) -> List[int]:
     db = next(get_db())
     
     try:
-        assets = db.query(Company.id).filter(
-            Company.symbol.in_(symbols)
+        assets = db.query(Asset.id).filter(
+            Asset.symbol.in_(symbols)
         ).all()
         
-        found_symbols = db.query(Company.symbol).filter(
-            Company.symbol.in_(symbols)
+        found_symbols = db.query(Asset.symbol).filter(
+            Asset.symbol.in_(symbols)
         ).all()
         found_symbols = [row[0] for row in found_symbols]
         
@@ -257,7 +261,7 @@ def get_signal_stats(days: int = 7):
         ).first()
         
         # Assets without recent signals
-        total_assets = db.query(Company).filter(Company.is_active == True).count()
+        total_assets = db.query(Asset).filter(Asset.is_active == True).count()
         
         print("\n=== Signal Generation Statistics ===")
         print(f"Total signals: {total_signals}")

@@ -1,0 +1,191 @@
+LUMIA AI FINANCIAL ANALYTICS PLATFORM  
+A Project Report  
+
+Submitted in partial fulfillment of the  
+requirements for the award of the Degree of  
+BACHELOR OF SCIENCE (INFORMATION TECHNOLOGY)  
+(Semester V Project)  
+
+By  
+MUJAMMIL MAHALDAR  
+Seat Number: __________________  
+
+Under the esteemed guidance of  
+(Guide Name) __________________  
+
+DEPARTMENT OF INFORMATION TECHNOLOGY  
+BHAVNA TRUST’S JUNIOR & DEGREE COLLEGE OF COMMERCE & SCIENCE  
+(Affiliated to University of Mumbai)  
+MUMBAI - 400088 (MAHARASHTRA)  
+Academic Year: 2024-2025  
+
+------------------------------------------------------------
+CERTIFICATE  
+------------------------------------------------------------
+This is to certify that the project entitled "LUMIA AI FINANCIAL ANALYTICS PLATFORM" is the bonafide work of MUJAMMIL MAHALDAR carried out in partial fulfillment of the requirements for the award of the degree of BACHELOR OF SCIENCE (INFORMATION TECHNOLOGY), University of Mumbai for the academic year 2024-2025.  
+
+Internal Guide                                 Coordinator  
+
+External Examiner                              Principal / Head  
+
+Date: ____________________                     College Seal  
+
+------------------------------------------------------------
+APPROVAL PROFORMA  
+------------------------------------------------------------
+1. Name of the Student: MUJAMMIL MAHALDAR  
+2. Title of the Project: LUMIA AI FINANCIAL ANALYTICS PLATFORM  
+3. Name of the Guide: __________________________  
+4. Guide Teaching Experience: ___________________  
+5. Is this your first submission?  □ Yes  □ No  
+
+Student Signature: ____________     Guide Signature: ____________  
+Coordinator Signature: ____________  Date: ____________  
+
+------------------------------------------------------------
+ACKNOWLEDGEMENT  
+------------------------------------------------------------
+I express my heartfelt gratitude to the Principal, Head of Department, faculty members, and my guide for their invaluable guidance and encouragement. I also thank my parents and peers for their moral support. Lumia was conceived to transform raw, fragmented financial data into structured, explainable, AI‑assisted investment intelligence, and the academic journey has been transformative.  
+
+------------------------------------------------------------
+DECLARATION  
+------------------------------------------------------------
+I, MUJAMMIL MAHALDAR, hereby declare that the project entitled "LUMIA AI FINANCIAL ANALYTICS PLATFORM" submitted for Semester V B.Sc. (IT) is an original work carried out by me and has not been submitted to any other university for the award of any degree.  
+
+------------------------------------------------------------
+INDEX / TABLE OF CONTENTS  
+------------------------------------------------------------
+CHAPTER 1  INTRODUCTION  
+	1.1 Background & Motivation  
+		1.1.1 Industry Context  
+		1.1.2 Data Explosion vs Insight Gap  
+	1.2 Problem Statement  
+	1.3 Objectives  
+		1.3.1 Technical Objectives  
+		1.3.2 Analytical Objectives  
+		1.3.3 UX Objectives  
+	1.4 Purpose, Scope & Applicability  
+	1.5 Achievements (v0.0.1)  
+	1.6 Constraints & Assumptions  
+	1.7 Academic Relevance  
+	1.8 Chapter Overview  
+	1.9 Document Conventions  
+	1.10 Glossary Pointer  
+
+CHAPTER 2  SURVEY OF TECHNOLOGIES  
+	2.1 Python 3.10  
+		2.1.1 Rationale  
+		2.1.2 Dependency Management  
+	2.2 FastAPI  
+		2.2.1 Async & Pydantic  
+	2.3 Streamlit  
+	2.4 SQLAlchemy & Alembic  
+		2.4.1 Migration Workflow  
+	2.5 PostgreSQL + TimescaleDB  
+		2.5.1 Hypertables  
+		2.5.2 Indexes  
+	2.6 APScheduler  
+	2.7 NumPy / Pandas  
+	2.8 Sentiment (FinBERT, VADER Roadmap)  
+	2.9 Alternatives Considered  
+	2.10 Justification Summary  
+
+CHAPTER 3  REQUIREMENTS & ANALYSIS  
+	3.1 Functional Requirements (Current vs Planned)  
+	3.2 Non-Functional Requirements  
+	3.3 User Personas & Use Cases  
+	3.4 Risk Analysis & Mitigation  
+	3.5 Data Sources & Coverage  
+	3.6 Domain Assumptions  
+	3.7 Success Metrics (KPIs)  
+
+CHAPTER 4  SYSTEM DESIGN  
+	4.1 Architecture Overview  
+	4.2 Module Layering  
+	4.3 Data Model  
+	4.4 Process Flows  
+	4.5 Interaction Sequences  
+	4.6 API Principles  
+	4.7 Deployment Context  
+	4.8 Configuration Management  
+
+CHAPTER 5  IMPLEMENTATION AND TESTING  
+	5.1 Implementation Approaches  
+	5.2 Coding Details and Code Efficiency  
+	5.3 Testing Approach  
+		5.3.1 Unit Testing  
+		5.3.2 Integration Testing  
+		5.3.3 Performance Testing  
+	5.4 Sentiment Analysis Pipeline  
+	5.5 Scheduling and Automation  
+	5.6 Error Handling and System Reliability  
+	5.7 User Interface and Experience  
+	5.8 Deployment and Production Considerations  
+
+CHAPTER 6  RESULTS AND DISCUSSION  
+	6.1 Test Reports  
+		6.1.1 Signal Generation Testing Results  
+		6.1.2 Recommendation Engine Performance  
+		6.1.3 System Integration Test Results  
+	6.2 User Documentation  
+		6.2.1 Platform Overview  
+		6.2.2 User Interface Guide  
+		6.2.3 Investment Analysis Features  
+
+CHAPTER 7  CONCLUSIONS  
+	7.1 Conclusions  
+		7.1.1 Significance of the System  
+	7.2 Limitations of the System  
+	7.3 Future Scope of the Project  
+
+CHAPTER 8  REFERENCES  
+	8.1 Technical Documentation  
+	8.2 Academic & Financial Literature  
+	8.3 Open Source Resources  
+
+APPENDICES  
+	A. Installation  
+	B. API Specs  
+	C. Data Model  
+	D. Risk Matrix  
+	E. Glossary  
+	F. Deployment  
+	G. Monitoring  
+	H. ML Roadmap  
+	I. Backtesting  
+	J. Config Reference  
+	K. Logging Taxonomy  
+	L. Sample Allocation  
+	M. Migration Guide  
+	N. Data Quality  
+	O. Security Checklist  
+	P. Enhancement Backlog  
+	Q. Governance Notes  
+	R. Performance Logs  
+	S. Sentiment Samples  
+	T. Signal Examples  
+	U. Allocation Scenarios  
+	V. Backtest Placeholders  
+	W. Change Log  
+	X. Template Forms  
+	Y. Academic Contribution  
+	Z. Future Research  
+
+----- END OF INDEX (Body content to follow) -----  
+ 
+
+ 
+
+ 
+
+ 
+
+I hereby declare that the project entitled, “Breakout Ball Game” done at place where the project is 
+
+done, has not been in any case duplicated to submit to any other university for the award of any 
+
+degree. To the best of my knowledge other than me, no one has submitted to any other university. 
+
+The project is done in partial fulfillment of the requirements for the award of degree of BACHELOR 
+
+OF SCIENCE (INFORMATION TECHNOLOGY) to be submitted as sixth semester project as part 
