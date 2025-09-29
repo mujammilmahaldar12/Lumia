@@ -1,23 +1,3 @@
-CHAPTER 2  SURVEY OF TECHNOLOGIES  
-	2.1 Python 3.10  
-		2.1.1 Rationale  
-		2.1.2 Dependency Management  
-	2.2 FastAPI  
-		2.2.1 Async & Pydantic  
-	2.3 Streamlit  
-	2.4 SQLAlchemy & Alembic  
-		2.4.1 Migration Workflow  
-	2.5 PostgreSQL + TimescaleDB  
-		2.5.1 Hypertables  
-		2.5.2 Indexes  
-	2.6 APScheduler  
-	2.7 NumPy / Pandas  
-	2.8 Sentiment (FinBERT, VADER Roadmap)  
-	2.9 Alternatives Considered  
-	2.10 Justification Summary  
-
-CHAPTER 2: SURVEY OF TECHNOLOGIES
-
 This chapter provides a comprehensive analysis of the technology stack selected for the Lumia AI Financial Analytics Platform. Each technology choice is justified based on specific requirements for financial data processing, real-time analytics, scalability, and user experience. The selection criteria prioritize performance, reliability, maintainability, and ecosystem maturity for building a production-grade financial analytics system.
 
 The Lumia platform architecture follows modern software engineering principles, emphasizing microservices design, API-first development, and data-driven decision making. The technology survey encompasses backend frameworks, database systems, data processing libraries, frontend frameworks, and specialized financial analysis tools.

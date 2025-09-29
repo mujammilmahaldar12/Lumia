@@ -1,22 +1,3 @@
-CHAPTER 1  INTRODUCTION  
-	1.1 Background & Motivation  
-		1.1.1 Industry Context  
-		1.1.2 Data Explosion vs Insight Gap  
-	1.2 Problem Statement  
-	1.3 Objectives  
-		1.3.1 Technical Objectives  
-		1.3.2 Analytical Objectives  
-		1.3.3 UX Objectives  
-	1.4 Purpose, Scope & Applicability  
-	1.5 Achievements (v0.0.1)  
-	1.6 Constraints & Assumptions  
-	1.7 Academic Relevance  
-	1.8 Chapter Overview  
-	1.9 Document Conventions  
-	1.10 Glossary Pointer  
-
-CHAPTER 1: INTRODUCTION
-
 Welcome to Lumia AI Financial Analytics Platform - an intelligent investment recommendation system designed to bridge the gap between raw financial data and actionable investment insights. This platform represents a comprehensive approach to modern portfolio management, leveraging cutting-edge technologies in data processing, sentiment analysis, and algorithmic trading to provide personalized investment recommendations.
 
 The Lumia platform addresses the critical challenge faced by modern investors: transforming vast amounts of financial data into meaningful, personalized investment strategies that align with individual risk profiles and growth expectations.
