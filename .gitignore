@@ -190,3 +190,9 @@ project_env/
 uploads/
 downloads/
 cache/
+
+#alembic
+alembic.ini
+alembic/env.py
+alembic/script.py.mako
+almebic*
