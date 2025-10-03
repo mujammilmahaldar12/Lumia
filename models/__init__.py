@@ -1,5 +1,4 @@
 from .assets import Asset
-from .company import Company  # Legacy - use Asset instead
 from .daily_price import DailyPrice
 from .quarterly_fundamental import QuarterlyFundamental
 from .user import User

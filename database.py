@@ -8,7 +8,7 @@ from sqlalchemy.pool import StaticPool
 # Get database URL from environment or use default
 DATABASE_URL = os.getenv(
     'DATABASE_URL', 
-    "postgresql+psycopg2://postgres:root@localhost/lumia"
+    "postgresql+psycopg2://postgres:root@localhost/lumia_test"
 )
 
 # Create engine with connection pooling

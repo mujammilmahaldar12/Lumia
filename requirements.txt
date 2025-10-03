@@ -74,3 +74,5 @@ alpha-vantage>=2.3.1
 nltk>=3.8.1
 scikit-learn>=1.2.0
 scipy>=1.9.0
+
+psutil>=7.1.0

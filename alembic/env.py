@@ -16,12 +16,23 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 from database import Base
-from models.user import User
-from models.company import Company
+# Import all models to ensure they're registered with Base.metadata
 from models.assets import Asset
 from models.daily_price import DailyPrice
 from models.quarterly_fundamental import QuarterlyFundamental
+from models.user import User
+from models.etf import ETF
+from models.mutual_fund import MutualFund
+from models.crypto import Crypto
+from models.news_article import NewsArticle
+from models.news_asset_map import NewsAssetMap
+from models.news_sentiment import NewsSentiment
+from models.asset_daily_signals import AssetDailySignals
 
 target_metadata = Base.metadata
 
@@ -43,7 +54,8 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    from database import DATABASE_URL
+    url = DATABASE_URL or config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -62,11 +74,8 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    from database import engine
+    connectable = engine
 
     with connectable.connect() as connection:
         context.configure(
