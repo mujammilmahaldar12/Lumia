@@ -13,12 +13,18 @@ from datetime import datetime, date
 from typing import List, Dict, Tuple, Optional
 import logging
 import time
+import sys
+import os
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
+
+# Add parent directory to path for imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import our models
 from models.assets import Asset
 from database import get_db
+from utils.logging_config import setup_unicode_logging
 
 
 class StocksManager:
@@ -51,17 +57,12 @@ class StocksManager:
         ]
     
     def _setup_logger(self):
-        """Setup logging for the stocks manager."""
-        logger = logging.getLogger("lumia.stocks_manager")
-        logger.setLevel(logging.INFO)
-        
-        if not logger.handlers:
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            handler.setFormatter(formatter)
-            logger.addHandler(handler)
-        
-        return logger
+        """Setup Unicode-safe logging for the stocks manager."""
+        return setup_unicode_logging(
+            "lumia.stocks_manager",
+            level='INFO',
+            console=True
+        )
     
     def get_db_session(self) -> Session:
         """Get database session."""

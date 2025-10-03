@@ -15,11 +15,17 @@ import logging
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
 import time
+import sys
+import os
+
+# Add parent directory to path for imports
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import our models
 from models.assets import Asset
 from models.daily_price import DailyPrice
 from database import get_db
+from utils.logging_config import setup_unicode_logging
 
 
 class DailyPriceCollector:
@@ -38,17 +44,12 @@ class DailyPriceCollector:
         self.last_crypto_request = 0
     
     def _setup_logger(self):
-        """Setup logging for the price collector."""
-        logger = logging.getLogger("lumia.daily_price_collector")
-        logger.setLevel(logging.INFO)
-        
-        if not logger.handlers:
-            handler = logging.StreamHandler()
-            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-            handler.setFormatter(formatter)
-            logger.addHandler(handler)
-        
-        return logger
+        """Setup Unicode-safe logging for the price collector."""
+        return setup_unicode_logging(
+            "lumia.daily_price_collector",
+            level='INFO',
+            console=True
+        )
     
     def get_db_session(self) -> Session:
         """Get database session."""
@@ -66,35 +67,147 @@ class DailyPriceCollector:
     # FUNCTION 1: DOWNLOAD STOCK PRICES
     # ========================================
     
-    def download_stock_prices(self, stocks: List[Asset]) -> List[Dict]:
+    def download_stock_prices_progressive(self, stocks: List[Asset], from_date: str = None, to_date: str = None, batch_size: int = 50) -> Dict:
+        """
+        Download historical stock price data with progressive database commits.
+        
+        Args:
+            stocks: List of stock Asset objects
+            from_date: Start date for price collection (YYYY-MM-DD format)
+            to_date: End date for price collection (YYYY-MM-DD format)
+            batch_size: Number of stocks to process before committing to database
+            
+        Returns:
+            Dictionary with collection results
+        """
+        self.logger.info(f"[PRICES] Downloading price data for {len(stocks)} stocks (progressive mode)...")
+        
+        total_processed = 0
+        total_added = 0
+        total_failed = 0
+        
+        # Determine date range
+        if from_date and to_date:
+            start_date = datetime.strptime(from_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(to_date, '%Y-%m-%d').date()
+            self.logger.info(f"[DATE] Using specified date range: {start_date} to {end_date}")
+        else:
+            # Use default range - 25 years of history
+            start_date = date.today() - timedelta(days=25*365)  # 25 years
+            end_date = date.today()
+            self.logger.info(f"[DATE] Using default date range: {start_date} to {end_date} (25 years)")
+        
+        # Process stocks in batches
+        for i in range(0, len(stocks), batch_size):
+            batch = stocks[i:i + batch_size]
+            batch_price_data = []
+            
+            self.logger.info(f"[BATCH] Processing batch {i//batch_size + 1}/{(len(stocks) + batch_size - 1)//batch_size} ({len(batch)} stocks)...")
+            
+            for stock in batch:
+                try:
+                    self.logger.info(f"  Fetching prices for {stock.symbol}...")
+                    
+                    # For historical data collection, always use the requested start date
+                    actual_start_date = start_date
+                    
+                    # Download using yfinance
+                    ticker = yf.Ticker(stock.symbol)
+                    hist = ticker.history(start=actual_start_date, end=end_date)
+                    
+                    if not hist.empty:
+                        # Convert to our format
+                        stock_prices = []
+                        for date_idx, row in hist.iterrows():
+                            price_data = {
+                                'asset_id': stock.id,
+                                'date': date_idx.date(),
+                                'open_price': float(row['Open']),
+                                'high_price': float(row['High']),
+                                'low_price': float(row['Low']),
+                                'close_price': float(row['Close']),
+                                'adj_close': float(row.get('Adj Close', row['Close'])),  # Use Close if Adj Close not available
+                                'volume': int(row['Volume']),
+                                'dividends': float(row.get('Dividends', 0.0)),
+                                'stock_splits': float(row.get('Stock Splits', 0.0))
+                            }
+                            stock_prices.append(price_data)
+                        
+                        batch_price_data.extend(stock_prices)
+                        self.logger.info(f"    [SUCCESS] Got {len(stock_prices)} price records for {stock.symbol}")
+                        total_processed += 1
+                        
+                    else:
+                        self.logger.warning(f"    [WARNING] No price data for {stock.symbol}")
+                        total_failed += 1
+                        
+                except Exception as e:
+                    self.logger.warning(f"    [ERROR] Failed to download {stock.symbol}: {str(e)}")
+                    total_failed += 1
+            
+            # Process and save this batch immediately
+            if batch_price_data:
+                self.logger.info(f"[COMMIT] Processing {len(batch_price_data)} price records for batch...")
+                prices_to_add, _ = self.cross_check_prices(batch_price_data)
+                
+                if prices_to_add:
+                    self.add_new_prices(prices_to_add)
+                    total_added += len(prices_to_add)
+                    self.logger.info(f"[COMMIT] ✅ Saved {len(prices_to_add)} new price records to database")
+                else:
+                    self.logger.info(f"[COMMIT] No new prices to add for this batch")
+            
+            # Progress update
+            progress = ((i + len(batch)) / len(stocks)) * 100
+            self.logger.info(f"[PROGRESS] {progress:.1f}% complete ({i + len(batch)}/{len(stocks)} stocks processed)")
+        
+        return {
+            'total': total_processed,
+            'success': total_processed,
+            'failed': total_failed,
+            'records_added': total_added
+        }
+
+    def download_stock_prices(self, stocks: List[Asset], from_date: str = None, to_date: str = None) -> Dict:
         """
         Download historical stock price data using yfinance.
         
         Args:
             stocks: List of stock Asset objects
+            from_date: Start date for price collection (YYYY-MM-DD format)
+            to_date: End date for price collection (YYYY-MM-DD format)
             
         Returns:
-            List of price data dictionaries
+            Dictionary with collection results and price data list
         """
-        self.logger.info(f"📈 Downloading price data for {len(stocks)} stocks...")
+        self.logger.info(f"[PRICES] Downloading price data for {len(stocks)} stocks...")
         
         all_price_data = []
         successful_downloads = 0
+        failed_downloads = 0
+        
+        # Determine date range
+        if from_date and to_date:
+            start_date = datetime.strptime(from_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(to_date, '%Y-%m-%d').date()
+            self.logger.info(f"[DATE] Using specified date range: {start_date} to {end_date}")
+        else:
+            # Use default range - 25 years of history
+            start_date = date.today() - timedelta(days=25*365)  # 25 years
+            end_date = date.today()
+            self.logger.info(f"[DATE] Using default date range: {start_date} to {end_date} (25 years)")
         
         for stock in stocks:
             try:
                 self.logger.info(f"  Fetching prices for {stock.symbol}...")
                 
-                # Get date range (from creation or 1 year ago, whichever is more recent)
-                start_date = max(
-                    stock.created_at.date() if stock.created_at else date.today() - timedelta(days=365),
-                    date.today() - timedelta(days=365)  # Max 1 year for initial load
-                )
-                end_date = date.today()
+                # For historical data collection, always use the requested start date
+                # Asset creation date is irrelevant for historical price data
+                actual_start_date = start_date
                 
                 # Download using yfinance
                 ticker = yf.Ticker(stock.symbol)
-                hist = ticker.history(start=start_date, end=end_date)
+                hist = ticker.history(start=actual_start_date, end=end_date)
                 
                 if not hist.empty:
                     # Convert to our format
@@ -114,19 +227,28 @@ class DailyPriceCollector:
                         all_price_data.append(price_data)
                     
                     successful_downloads += 1
-                    self.logger.info(f"    ✅ Got {len(hist)} price records for {stock.symbol}")
+                    self.logger.info(f"    [SUCCESS] Got {len(hist)} price records for {stock.symbol}")
                 else:
-                    self.logger.warning(f"    ⚠️ No price data for {stock.symbol}")
+                    self.logger.warning(f"    [WARNING] No price data for {stock.symbol}")
+                    failed_downloads += 1
                 
                 # Small delay to respect API limits
                 time.sleep(0.1)
                 
             except Exception as e:
-                self.logger.error(f"    ❌ Error downloading {stock.symbol}: {str(e)}")
+                self.logger.error(f"    [ERROR] Error downloading {stock.symbol}: {str(e)}")
+                failed_downloads += 1
                 continue
         
-        self.logger.info(f"✅ Successfully downloaded prices for {successful_downloads}/{len(stocks)} stocks")
-        return all_price_data
+        self.logger.info(f"[SUCCESS] Successfully downloaded prices for {successful_downloads}/{len(stocks)} stocks")
+        
+        return {
+            'price_data': all_price_data,
+            'total': len(stocks),
+            'success': successful_downloads,
+            'failed': failed_downloads,
+            'records_count': len(all_price_data)
+        }
     
     # ========================================
     # FUNCTION 2: DOWNLOAD MUTUAL FUND PRICES
@@ -142,7 +264,7 @@ class DailyPriceCollector:
         Returns:
             List of price data dictionaries
         """
-        self.logger.info(f"📊 Downloading price data for {len(mutual_funds)} mutual funds...")
+        self.logger.info(f"[MUTUAL FUNDS] Downloading price data for {len(mutual_funds)} mutual funds...")
         
         all_price_data = []
         successful_downloads = 0
@@ -181,22 +303,22 @@ class DailyPriceCollector:
                             all_price_data.append(price_data)
                         
                         successful_downloads += 1
-                        self.logger.info(f"    ✅ Got {len(hist)} price records for {fund.symbol}")
+                        self.logger.info(f"    [SUCCESS] Got {len(hist)} price records for {fund.symbol}")
                     else:
-                        self.logger.warning(f"    ⚠️ No price data for {fund.symbol}")
+                        self.logger.warning(f"    [WARNING] No price data for {fund.symbol}")
                 
                 else:
                     # Indian mutual funds - would need AMFI NAV data
                     # For now, we'll skip but this can be implemented with AMFI API
-                    self.logger.info(f"    ℹ️ Indian MF price collection not implemented yet: {fund.symbol}")
+                    self.logger.info(f"    [INFO] Indian MF price collection not implemented yet: {fund.symbol}")
                 
                 time.sleep(0.1)
                 
             except Exception as e:
-                self.logger.error(f"    ❌ Error downloading {fund.symbol}: {str(e)}")
+                self.logger.error(f"    [ERROR] Error downloading {fund.symbol}: {str(e)}")
                 continue
         
-        self.logger.info(f"✅ Successfully downloaded prices for {successful_downloads}/{len(mutual_funds)} mutual funds")
+        self.logger.info(f"[SUCCESS] Successfully downloaded prices for {successful_downloads}/{len(mutual_funds)} mutual funds")
         return all_price_data
     
     # ========================================
@@ -213,7 +335,7 @@ class DailyPriceCollector:
         Returns:
             List of price data dictionaries
         """
-        self.logger.info(f"📈 Downloading price data for {len(etfs)} ETFs...")
+        self.logger.info(f"[ETFS] Downloading price data for {len(etfs)} ETFs...")
         
         all_price_data = []
         successful_downloads = 0
@@ -249,38 +371,53 @@ class DailyPriceCollector:
                         all_price_data.append(price_data)
                     
                     successful_downloads += 1
-                    self.logger.info(f"    ✅ Got {len(hist)} price records for {etf.symbol}")
+                    self.logger.info(f"    [SUCCESS] Got {len(hist)} price records for {etf.symbol}")
                 else:
-                    self.logger.warning(f"    ⚠️ No price data for {etf.symbol}")
+                    self.logger.warning(f"    [WARNING] No price data for {etf.symbol}")
                 
                 time.sleep(0.1)
                 
             except Exception as e:
-                self.logger.error(f"    ❌ Error downloading {etf.symbol}: {str(e)}")
+                self.logger.error(f"    [ERROR] Error downloading {etf.symbol}: {str(e)}")
                 continue
         
-        self.logger.info(f"✅ Successfully downloaded prices for {successful_downloads}/{len(etfs)} ETFs")
+        self.logger.info(f"[SUCCESS] Successfully downloaded prices for {successful_downloads}/{len(etfs)} ETFs")
         return all_price_data
     
     # ========================================
     # FUNCTION 4: DOWNLOAD CRYPTO PRICES
     # ========================================
     
-    def download_crypto_prices(self, cryptos: List[Asset]) -> List[Dict]:
+    def download_crypto_prices(self, cryptos: List[Asset], from_date: str = None, to_date: str = None) -> Dict:
         """
         Download historical cryptocurrency price data using CoinGecko.
         
         Args:
             cryptos: List of crypto Asset objects
+            from_date: Start date for price collection (YYYY-MM-DD format)
+            to_date: End date for price collection (YYYY-MM-DD format)
             
         Returns:
-            List of price data dictionaries
+            Dictionary with collection results and price data
         """
-        self.logger.info(f"₿ Downloading price data for {len(cryptos)} cryptocurrencies...")
+        self.logger.info(f"[CRYPTO] Downloading price data for {len(cryptos)} cryptocurrencies...")
         
         all_price_data = []
         successful_downloads = 0
         failed_cryptos = []
+        
+        # Determine date range and API parameters
+        if from_date and to_date:
+            start_date = datetime.strptime(from_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(to_date, '%Y-%m-%d').date()
+            days_requested = (end_date - start_date).days
+            self.logger.info(f"[DATE] Using specified date range: {start_date} to {end_date} ({days_requested} days)")
+        else:
+            # Default: last 30 days for API limits
+            start_date = date.today() - timedelta(days=30)
+            end_date = date.today()
+            days_requested = 30
+            self.logger.info(f"[DATE] Using default range: {start_date} to {end_date} (30 days)")
         
         for crypto in cryptos:
             success = False
@@ -301,16 +438,24 @@ class DailyPriceCollector:
                     # Get crypto ID mapping
                     crypto_id = self._get_crypto_id_mapping(crypto.symbol)
                     
-                    # Calculate date range (last 30 days for initial load to respect free API limits)
-                    start_date = date.today() - timedelta(days=30)
-                    
                     # CoinGecko historical prices endpoint
                     url = f"{self.coingecko_base_url}/coins/{crypto_id}/market_chart"
                     
+                    # Use smart days parameter based on date range
+                    if days_requested <= 1:
+                        interval = 'hourly'
+                        days_param = '1'
+                    elif days_requested <= 90:
+                        interval = 'daily'
+                        days_param = str(min(days_requested, 90))  # CoinGecko free limit
+                    else:
+                        interval = 'daily'
+                        days_param = '90'  # Maximum for free API
+                    
                     params = {
                         'vs_currency': 'usd',
-                        'days': '30',  # Last 30 days
-                        'interval': 'daily'
+                        'days': days_param,
+                        'interval': interval
                     }
                     
                     # Add headers to look more like a browser
@@ -355,17 +500,17 @@ class DailyPriceCollector:
                             
                             all_price_data.extend(crypto_price_data)
                             successful_downloads += 1
-                            self.logger.info(f"    ✅ Got {len(prices)} price records for {crypto.symbol}")
+                            self.logger.info(f"    [SUCCESS] Got {len(prices)} price records for {crypto.symbol}")
                             success = True
                             break
                         else:
-                            self.logger.warning(f"    ⚠️ No price data in response for {crypto.symbol}")
+                            self.logger.warning(f"    [WARNING] No price data in response for {crypto.symbol}")
                             break  # No point retrying if there's no data
                     
                     elif response.status_code == 429:
                         # Rate limited - exponential backoff
                         retry_delay = base_delay * (3 ** (attempt + 1))  # 6s, 18s, 54s
-                        self.logger.warning(f"    ⚠️ Rate limited for {crypto.symbol}. Waiting {retry_delay:.1f}s before retry...")
+                        self.logger.warning(f"    [WARNING] Rate limited for {crypto.symbol}. Waiting {retry_delay:.1f}s before retry...")
                         time.sleep(retry_delay)
                         continue
                     
@@ -399,7 +544,15 @@ class DailyPriceCollector:
             self.logger.warning(f"⚠️ Failed to download prices for: {', '.join(failed_cryptos)}")
         
         self.logger.info(f"✅ Successfully downloaded prices for {successful_downloads}/{len(cryptos)} cryptocurrencies")
-        return all_price_data
+        
+        return {
+            'price_data': all_price_data,
+            'total': len(cryptos),
+            'success': successful_downloads,
+            'failed': len(failed_cryptos),
+            'failed_symbols': failed_cryptos,
+            'records_count': len(all_price_data)
+        }
     
     def _rate_limit_crypto(self, delay: float = None):
         """Implement enhanced rate limiting for CoinGecko API."""
@@ -476,7 +629,7 @@ class DailyPriceCollector:
         Returns:
             Tuple of (prices_to_add, prices_to_update)
         """
-        self.logger.info(f"🔍 Cross-checking {len(new_prices)} price records with database...")
+        self.logger.info(f"[SEARCH] Cross-checking {len(new_prices)} price records with database...")
         
         db = self.get_db_session()
         
@@ -515,7 +668,7 @@ class DailyPriceCollector:
                     # New price record
                     prices_to_add.append(new_price)
         
-        self.logger.info(f"📊 Cross-check results:")
+        self.logger.info(f"[RESULTS] Cross-check results:")
         self.logger.info(f"  - New price records to add: {len(prices_to_add)}")
         self.logger.info(f"  - Price records to update: {len(prices_to_update)}")
         
@@ -564,7 +717,7 @@ class DailyPriceCollector:
             self.logger.info("ℹ️ No new price records to add")
             return
         
-        self.logger.info(f"➕ Adding {len(prices_to_add)} new price records...")
+        self.logger.info(f"[ADD] Adding {len(prices_to_add)} new price records...")
         
         db = self.get_db_session()
         added_count = 0
@@ -593,9 +746,9 @@ class DailyPriceCollector:
                 
                 # Commit each batch
                 db.commit()
-                self.logger.info(f"  ✅ Added batch {i//batch_size + 1}: {len(batch)} records")
+                self.logger.info(f"  [BATCH] Added batch {i//batch_size + 1}: {len(batch)} records")
             
-            self.logger.info(f"✅ Successfully added {added_count} new price records")
+            self.logger.info(f"[SUCCESS] Successfully added {added_count} new price records")
             
         except Exception as e:
             self.logger.error(f"❌ Error adding price records: {str(e)}")
@@ -605,6 +758,79 @@ class DailyPriceCollector:
     # FUNCTION 7: MAIN ORCHESTRATOR
     # ========================================
     
+    def sync_prices_with_date_range(self, from_date: str, to_date: str) -> Dict:
+        """
+        Intelligent price synchronization with specific date range.
+        Used by smart collector for optimized data collection.
+        
+        Args:
+            from_date: Start date (YYYY-MM-DD)
+            to_date: End date (YYYY-MM-DD)
+            
+        Returns:
+            Dictionary with detailed collection results
+        """
+        self.logger.info(f"🧠 Starting intelligent price sync: {from_date} to {to_date}")
+        
+        try:
+            db = self.get_db_session()
+            
+            # Get active assets
+            stocks = db.query(Asset).filter(Asset.type == 'stock', Asset.is_active == True).all()
+            cryptos = db.query(Asset).filter(Asset.type == 'crypto', Asset.is_active == True).all()
+            etfs = db.query(Asset).filter(Asset.type == 'etf', Asset.is_active == True).all()
+            
+            self.logger.info(f"📊 Assets to process: {len(stocks)} stocks, {len(cryptos)} cryptos, {len(etfs)} ETFs")
+            
+            all_results = {
+                'total_processed': 0,
+                'total_added': 0,
+                'total_failed': 0,
+                'by_type': {}
+            }
+            
+            # Process each asset type with progressive commits
+            if stocks:
+                self.logger.info("📈 Processing stocks with progressive commits...")
+                stock_result = self.download_stock_prices_progressive(stocks, from_date, to_date, batch_size=50)
+                
+                all_results['by_type']['stocks'] = stock_result
+                all_results['total_processed'] += stock_result['total']
+                all_results['total_added'] += stock_result.get('records_added', 0)
+                all_results['total_failed'] += stock_result['failed']
+            
+            if cryptos:
+                self.logger.info("[CRYPTO] Processing cryptocurrencies with date range...")
+                crypto_result = self.download_crypto_prices(cryptos, from_date, to_date)
+                
+                if crypto_result['price_data']:
+                    prices_to_add, _ = self.cross_check_prices(crypto_result['price_data'])
+                    self.add_new_prices(prices_to_add)
+                    
+                all_results['by_type']['crypto'] = crypto_result
+                all_results['total_processed'] += crypto_result['total']
+                all_results['total_added'] += len(prices_to_add) if 'prices_to_add' in locals() else 0
+                all_results['total_failed'] += crypto_result['failed']
+            
+            if etfs:
+                self.logger.info("📊 Processing ETFs with date range...")
+                etf_result = self.download_etf_prices(etfs)  # ETF method doesn't have date params yet
+                
+                if etf_result:
+                    prices_to_add, _ = self.cross_check_prices(etf_result)
+                    self.add_new_prices(prices_to_add)
+            
+            self.logger.info(f"🎉 Intelligent price sync completed!")
+            self.logger.info(f"📊 Total: {all_results['total_processed']} processed, {all_results['total_added']} added")
+            
+            return all_results
+            
+        except Exception as e:
+            self.logger.error(f"❌ Error in intelligent price sync: {str(e)}")
+            raise
+        finally:
+            self.close_db_session()
+
     def sync_all_daily_prices(self):
         """
         Main function to sync all daily prices.
