@@ -43,8 +43,8 @@ class ETFManager:
             "VTI", "VEA", "VWO", "BND", "VNQ", "VGT", "VHT", "VFH", "VDC", "VDE",
             # iShares ETFs
             "IWM", "EFA", "EEM", "AGG", "QQQ", "IYR", "IJR", "IJH", "IVV", "IVW",
-            # Invesco ETFs
-            "QQQ", "ARKK", "ARKQ", "ARKW", "ARKG", "ARKF",
+            # ARK ETFs (removed duplicate QQQ)
+            "ARKK", "ARKQ", "ARKW", "ARKG", "ARKF",
             # Sector ETFs
             "GLD", "SLV", "USO", "TLT", "HYG", "LQD", "IEMG", "VGK", "VPL"
         ]
@@ -398,7 +398,7 @@ class ETFManager:
     # ========================================
     
     def add_new_etfs(self, etfs_to_add: List[Dict]):
-        """Add new ETF records to database."""
+        """Add new ETF records to database with duplicate handling."""
         if not etfs_to_add:
             self.logger.info("ℹ️ No new ETFs to add")
             return
@@ -407,9 +407,18 @@ class ETFManager:
         
         db = self.get_db_session()
         added_count = 0
+        skipped_count = 0
         
-        try:
-            for etf_data in etfs_to_add:
+        # Add ETFs one by one to handle duplicates gracefully
+        for etf_data in etfs_to_add:
+            try:
+                # Check if this symbol already exists (safety check)
+                existing = db.query(Asset).filter(Asset.symbol == etf_data['symbol']).first()
+                if existing:
+                    self.logger.warning(f"  ⚠️ Skipped {etf_data['symbol']} (already exists)")
+                    skipped_count += 1
+                    continue
+                
                 # Create new Asset record for ETF
                 new_asset = Asset(
                     symbol=etf_data['symbol'],
@@ -430,15 +439,19 @@ class ETFManager:
                 )
                 
                 db.add(new_asset)
+                db.commit()  # Commit each one individually
                 added_count += 1
                 self.logger.info(f"  ➕ Added {etf_data['symbol']}")
-            
-            db.commit()
-            self.logger.info(f"✅ Successfully added {added_count} new ETFs")
-            
-        except Exception as e:
-            self.logger.error(f"❌ Error adding ETFs: {str(e)}")
-            db.rollback()
+                
+            except Exception as e:
+                db.rollback()
+                self.logger.error(f"  ❌ Failed to add {etf_data['symbol']}: {str(e)}")
+                skipped_count += 1
+                continue
+        
+        self.logger.info(f"✅ Successfully added {added_count} new ETFs")
+        if skipped_count > 0:
+            self.logger.info(f"⚠️ Skipped {skipped_count} ETFs (duplicates or errors)")
 
     # ========================================
     # FUNCTION 5: MAIN ORCHESTRATOR

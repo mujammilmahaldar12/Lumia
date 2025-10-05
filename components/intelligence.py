@@ -64,6 +64,7 @@ class IntelligenceEngine:
         from models.assets import Asset
         from models.daily_price import DailyPrice
         from models.collector_run import CollectorRun
+        from models.quarterly_fundamental import QuarterlyFundamental
         
         report = IntelligenceReport(
             database_state=DatabaseState.EMPTY,
@@ -111,7 +112,7 @@ class IntelligenceEngine:
         total_runs = session.query(CollectorRun).count()
         
         if total_runs > 0:
-            collector_types = ['stocks', 'etfs', 'mutual_funds', 'cryptocurrencies', 'daily_prices']
+            collector_types = ['stocks', 'etfs', 'mutual_funds', 'cryptocurrencies', 'fundamentals', 'daily_prices']
             
             for collector_type in collector_types:
                 last_run = session.query(CollectorRun).filter(
@@ -137,11 +138,11 @@ class IntelligenceEngine:
                 report.last_run_date = last_any_run.completed_at.date()
         
         # Decision Making
-        report = self._make_intelligent_decisions(report)
+        report = self._make_intelligent_decisions(report, session)
         
         return report
     
-    def _make_intelligent_decisions(self, report: IntelligenceReport) -> IntelligenceReport:
+    def _make_intelligent_decisions(self, report: IntelligenceReport, session) -> IntelligenceReport:
         """Make intelligent collection decisions"""
         
         # Determine database state
@@ -168,12 +169,14 @@ class IntelligenceEngine:
             report.priority_reasoning = "Database is mature - incremental updates only"
         
         # Determine collection strategy
-        report = self._determine_strategy(report)
+        report = self._determine_strategy(report, session)
         
         return report
     
-    def _determine_strategy(self, report: IntelligenceReport) -> IntelligenceReport:
+    def _determine_strategy(self, report: IntelligenceReport, session) -> IntelligenceReport:
         """Determine optimal collection strategy"""
+        
+        from models.quarterly_fundamental import QuarterlyFundamental
         
         if report.database_state == DatabaseState.EMPTY:
             # First time - 25 years of data
@@ -199,12 +202,18 @@ class IntelligenceEngine:
             
             if report.asset_breakdown.get('stock', 0) < 2000:
                 missing_collectors.append('stocks')
-            if report.asset_breakdown.get('etf', 0) < 100:
+            if report.asset_breakdown.get('etf', 0) < 50:  # Adjusted from 100 to 50
                 missing_collectors.append('etfs')
             if report.asset_breakdown.get('mutual_fund', 0) < 500:
                 missing_collectors.append('mutual_funds')
-            if report.asset_breakdown.get('crypto', 0) < 50:
+            if report.asset_breakdown.get('crypto', 0) < 30:  # Adjusted from 50 to 30
                 missing_collectors.append('cryptocurrencies')
+            
+            # Add fundamentals if no data exists
+            if report.total_assets > 0:
+                fundamentals_count = session.query(QuarterlyFundamental).count()
+                if fundamentals_count < report.asset_breakdown.get('stock', 0) * 0.5:  # Less than 50% of stocks have fundamentals
+                    missing_collectors.append('fundamentals')
             
             missing_collectors.append('daily_prices')
             report.collectors_to_run = missing_collectors
@@ -246,6 +255,11 @@ class IntelligenceEngine:
                 last_run = report.last_successful_runs.get(collector)
                 if not last_run or (datetime.utcnow() - last_run).days >= 7:
                     collectors_needed.append(collector)
+            
+            # Check fundamentals - update weekly (7 days)
+            last_fundamentals_run = report.last_successful_runs.get('fundamentals')
+            if not last_fundamentals_run or (datetime.utcnow() - last_fundamentals_run).days >= 7:
+                collectors_needed.append('fundamentals')
             
             last_price_run = report.last_successful_runs.get('daily_prices')
             if not last_price_run or (datetime.utcnow() - last_price_run).days >= 1:

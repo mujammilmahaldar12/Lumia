@@ -935,16 +935,16 @@ class DailyPriceCollector:
             all_price_data = []
             
             if stocks:
-                stock_prices = self.download_stock_prices(stocks)
-                all_price_data.extend(stock_prices)
+                result = self.download_stock_prices(stocks)
+                all_price_data.extend(result['price_data'])
             
             if etfs:
-                etf_prices = self.download_etf_prices(etfs)
+                etf_prices = self.download_etf_prices(etfs)  # Returns list directly
                 all_price_data.extend(etf_prices)
             
             if cryptos:
-                crypto_prices = self.download_crypto_prices(cryptos)
-                all_price_data.extend(crypto_prices)
+                result = self.download_crypto_prices(cryptos)
+                all_price_data.extend(result['price_data'])
             
             # Add only new prices (no need to check for updates in recent sync)
             if all_price_data:

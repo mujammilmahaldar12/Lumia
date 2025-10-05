@@ -94,14 +94,14 @@ class ExecutionEngine:
         from collectors.etf_manager import sync_etfs
         from collectors.mutual_fund_manager import sync_mutual_funds
         from collectors.crypto_manager import sync_cryptos
-        from collectors.fundamentals_collector import collect_all_fundamentals
+        from collectors.fundamentals_collector import update_stale_fundamentals
         
         collector_functions = {
             'stocks': sync_stocks,
             'etfs': sync_etfs,
             'mutual_funds': sync_mutual_funds,
             'cryptocurrencies': sync_cryptos,
-            'fundamentals': collect_all_fundamentals
+            'fundamentals': lambda: update_stale_fundamentals(days_old=90),  # Only update stale data
         }
         
         if collector_name not in collector_functions:
