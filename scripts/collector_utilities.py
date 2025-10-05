@@ -18,9 +18,6 @@ from database import SessionLocal
 from models.collector_run import CollectorRun
 from models.assets import Asset
 from models.daily_price import DailyPrice
-from models.crypto import Crypto
-from models.etf import ETF
-from models.mutual_fund import MutualFund
 
 logger = logging.getLogger('lumia.collector_utilities')
 
@@ -353,14 +350,21 @@ class CollectorReporter:
         """Get comprehensive asset summary"""
         logger.info("[REPORT] Generating asset summary")
         
-        # Count assets by type
+        # Count assets by type (using asset_type column)
         total_assets = self.session.query(Asset).count()
-        total_cryptos = self.session.query(Crypto).count()
-        total_etfs = self.session.query(ETF).count()
-        total_mutual_funds = self.session.query(MutualFund).count()
         
-        # Calculate stocks (assets that aren't crypto/etf/mutual fund)
-        total_stocks = total_assets - total_cryptos - total_etfs - total_mutual_funds
+        # Count by asset_type
+        from sqlalchemy import case
+        type_counts = self.session.query(
+            Asset.asset_type,
+            func.count(Asset.id)
+        ).group_by(Asset.asset_type).all()
+        
+        type_dict = {asset_type: count for asset_type, count in type_counts}
+        total_stocks = type_dict.get('stock', 0)
+        total_cryptos = type_dict.get('crypto', 0)
+        total_etfs = type_dict.get('etf', 0)
+        total_mutual_funds = type_dict.get('mutual_fund', 0)
         
         # Price data statistics
         total_price_records = self.session.query(DailyPrice).count()

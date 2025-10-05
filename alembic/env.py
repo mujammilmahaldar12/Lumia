@@ -25,14 +25,8 @@ from database import Base
 from models.assets import Asset
 from models.daily_price import DailyPrice
 from models.quarterly_fundamental import QuarterlyFundamental
-from models.user import User
-from models.etf import ETF
-from models.mutual_fund import MutualFund
-from models.crypto import Crypto
 from models.news_article import NewsArticle
-from models.news_asset_map import NewsAssetMap
-from models.news_sentiment import NewsSentiment
-from models.asset_daily_signals import AssetDailySignals
+from models.collector_run import CollectorRun
 
 target_metadata = Base.metadata
 

@@ -23,9 +23,9 @@ class NewsArticle(Base):
     fetched_at = Column(DateTime, default=func.now())  # When we fetched it
     is_processed = Column(Boolean, default=False)  # Whether sentiment analysis has been run
     
-    # Relationships
-    asset_mappings = relationship("NewsAssetMap", back_populates="article")
-    sentiments = relationship("NewsSentiment", back_populates="article")
+    # Relationships - commented out until models are created
+    # asset_mappings = relationship("NewsAssetMap", back_populates="article")
+    # sentiments = relationship("NewsSentiment", back_populates="article")
 
     # Indexes for performance
     __table_args__ = (

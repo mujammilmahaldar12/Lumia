@@ -23,6 +23,7 @@ from .mutual_fund_manager import MutualFundManager, sync_mutual_funds, sync_indi
 from .etf_manager import ETFManager, sync_etfs, sync_us_etfs_only, sync_indian_etfs_only
 from .crypto_manager import CryptoManager, sync_cryptos, sync_top_cryptos
 from .master_collector import MasterAssetCollector, sync_all_assets, sync_specific_assets, quick_sync
+from .fundamentals_collector import FundamentalsCollector, collect_all_fundamentals, update_stale_fundamentals, collect_for_symbol
 
 # Export all classes and convenience functions
 __all__ = [
@@ -32,6 +33,7 @@ __all__ = [
     'ETFManager',
     'CryptoManager',
     'MasterAssetCollector',
+    'FundamentalsCollector',
     
     # Individual Collector Functions
     'sync_stocks',
@@ -45,6 +47,11 @@ __all__ = [
     'sync_indian_etfs_only',
     'sync_cryptos',
     'sync_top_cryptos',
+    
+    # Fundamentals Collection
+    'collect_all_fundamentals',
+    'update_stale_fundamentals',
+    'collect_for_symbol',
     
     # Master Collection Functions
     'sync_all_assets',

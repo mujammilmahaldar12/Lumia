@@ -94,12 +94,14 @@ class ExecutionEngine:
         from collectors.etf_manager import sync_etfs
         from collectors.mutual_fund_manager import sync_mutual_funds
         from collectors.crypto_manager import sync_cryptos
+        from collectors.fundamentals_collector import collect_all_fundamentals
         
         collector_functions = {
             'stocks': sync_stocks,
             'etfs': sync_etfs,
             'mutual_funds': sync_mutual_funds,
-            'cryptocurrencies': sync_cryptos
+            'cryptocurrencies': sync_cryptos,
+            'fundamentals': collect_all_fundamentals
         }
         
         if collector_name not in collector_functions:
@@ -112,12 +114,19 @@ class ExecutionEngine:
             
             # Execute the collector function
             collector_function = collector_functions[collector_name]
-            collector_function()
+            result = collector_function()
             
-            # Note: Function-based collectors don't return detailed stats
-            # We'll track basic success/failure through run records
-            run_record.update_stats(
-                processed=1,  # Mark as processed
+            # Update stats if result is a dict with statistics
+            if isinstance(result, dict):
+                run_record.update_stats(
+                    processed=result.get('total', 1),
+                    added=result.get('success', 0),
+                    failed=result.get('failed', 0)
+                )
+            else:
+                # Basic tracking for collectors without detailed stats
+                run_record.update_stats(
+                    processed=1,  # Mark as processed
                 added=0,      # Unknown for function-based
                 updated=0,    # Unknown for function-based
                 failed=0      # No failure if we reach here
