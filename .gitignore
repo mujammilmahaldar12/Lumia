@@ -184,7 +184,8 @@ project_env/
 
 # Alembic
 # Keep the alembic folder but ignore specific migration files if needed
-# alembic/versions/*.py  # Uncomment if you don't want to track migration files
+alembic/versions/*.py  # Ignore all migration files in versions folder
+alembic/versions/__pycache__/  # Ignore compiled Python files in versions
 
 # Application specific
 uploads/
@@ -196,3 +197,4 @@ alembic.ini
 alembic/env.py
 alembic/script.py.mako
 almebic*
+*alembici
