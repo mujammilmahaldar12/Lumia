@@ -183,9 +183,8 @@ lumia_env/
 project_env/
 
 # Alembic
-# Keep the alembic folder but ignore specific migration files if needed
-alembic/versions/*.py  # Ignore all migration files in versions folder
-alembic/versions/__pycache__/  # Ignore compiled Python files in versions
+# Keep the alembic folder but ignore the versions folder completely
+alembic/versions/
 
 # Application specific
 uploads/
