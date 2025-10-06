@@ -17,6 +17,9 @@ engine = create_engine(
     echo=os.getenv('DEBUG_MODE', 'False').lower() == 'true',
     pool_pre_ping=True,  # Verify connections before use
     pool_recycle=3600,   # Recycle connections every hour
+    pool_size=20,        # Increased from default 5 to 20
+    max_overflow=40,     # Increased from default 10 to 40
+    pool_timeout=60,     # Increased from default 30 to 60 seconds
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

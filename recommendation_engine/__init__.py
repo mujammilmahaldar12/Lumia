@@ -3,20 +3,26 @@ Lumia Recommendation Engine
 
 A professional-grade investment recommendation system powered by AI.
 
-Features:
-- Technical Analysis (RSI, MACD, Moving Averages)
-- Fundamental Analysis (P/E, ROE, Debt Ratios)
-- AI Sentiment Analysis (FinBERT)
-- Risk Analysis (Beta, Volatility, Sharpe Ratio)
-- Modern Portfolio Theory (MPT) Optimization
-- Multi-Asset Support (Stocks, ETFs, Mutual Funds, Crypto, FDs)
-- Detailed Reasoning & Explanations
+NEW EXPERT ENGINE (RECOMMENDED):
+- Technical Analysis (25%)
+- Fundamental Analysis (30%) 
+- AI Sentiment Analysis (25%)
+- Risk Assessment (20%)
 
-Usage:
-    from database import get_db
-    from recommendation_engine import get_recommendations
+OLD SYSTEM (LEGACY):
+- Multi-asset portfolio optimization
+- Modern Portfolio Theory (MPT)
+- Detailed asset-level analysis
+
+Usage (NEW - Single Stock Recommendation):
+    from recommendation_engine import get_recommendation
     
-    db = next(get_db())
+    result = get_recommendation('TCS.NS', 'moderate', news_headlines)
+    print(result['recommendation']['action'])  # BUY/SELL/HOLD
+    print(result['reasoning'])
+
+Usage (OLD - Portfolio Optimization):
+    from recommendation_engine.engine import get_recommendations
     
     recommendations = get_recommendations(
         db=db,
@@ -24,10 +30,15 @@ Usage:
         risk_profile='moderate',
         timeline_months=12
     )
-    
-    print(recommendations['report'])
 """
 
+# NEW Expert System
+from recommendation_engine.expert_engine import (
+    get_recommendation,
+    ExpertRecommendationEngine
+)
+
+# OLD Legacy System
 from recommendation_engine.engine import (
     LumiaRecommendationEngine,
     get_recommendations,
@@ -35,8 +46,8 @@ from recommendation_engine.engine import (
 )
 
 from recommendation_engine.portfolio import (
-    build_portfolio,
-    RISK_PROFILES
+    FinRobotPortfolio,
+    display_portfolio
 )
 
 from recommendation_engine.analyzer import (
