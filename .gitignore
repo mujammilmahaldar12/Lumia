@@ -183,8 +183,8 @@ lumia_env/
 project_env/
 
 # Alembic
-# Keep the alembic folder but ignore specific migration files if needed
-# alembic/versions/*.py  # Uncomment if you don't want to track migration files
+# Keep the alembic folder but ignore the versions folder completely
+alembic/versions/
 
 # Application specific
 uploads/
@@ -196,3 +196,4 @@ alembic.ini
 alembic/env.py
 alembic/script.py.mako
 almebic*
+*alembici

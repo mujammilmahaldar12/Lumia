@@ -718,7 +718,7 @@ class DailyPriceCollector:
     
     def add_new_prices(self, prices_to_add: List[Dict]):
         """
-        Add new price records to database.
+        Add new price records to database with duplicate handling.
         
         Args:
             prices_to_add: List of new price records to add
@@ -727,12 +727,15 @@ class DailyPriceCollector:
             self.logger.info("ℹ️ No new price records to add")
             return
         
-        self.logger.info(f"[ADD] Adding {len(prices_to_add)} new price records...")
+        self.logger.info(f"[ADD] Adding {len(prices_to_add)} new price records with duplicate protection...")
         
         db = self.get_db_session()
         added_count = 0
         skipped_count = 0
         batch_size = 1000  # Process in batches for better performance
+        
+        # Import text for SQL execution
+        from sqlalchemy import text
         
         try:
             for i in range(0, len(prices_to_add), batch_size):
@@ -780,7 +783,7 @@ class DailyPriceCollector:
                 self.logger.info(f"[INFO] Skipped {skipped_count} duplicate records")
             
         except Exception as e:
-            self.logger.error(f"❌ Error adding price records: {str(e)}")
+            self.logger.error(f"❌ Critical error adding price records: {str(e)}")
             db.rollback()
 
     # ========================================

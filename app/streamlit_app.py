@@ -1499,53 +1499,150 @@ def display_portfolio_builder():
         st.header("Portfolio Configuration")
         
         with st.form("portfolio_form"):
-            # Capital input
+            # Capital input (float)
             capital = st.number_input(
-                "Total Investment Capital (₹)",
-                min_value=10000,
-                max_value=100000000,
-                value=100000,
-                step=10000,
-                help="Total amount you want to invest"
+                "💰 Total Investment Capital (₹)",
+                min_value=10000.0,
+                max_value=100000000.0,
+                value=100000.0,
+                step=1000.0,
+                format="%.2f",
+                help="Total amount you want to invest (supports decimal values)"
             )
             
-            # Risk appetite percentage
-            risk_pct = st.slider(
-                "Risk Appetite (%)",
-                min_value=0,
-                max_value=100,
-                value=30,
-                step=5,
-                help="0-30%: Conservative | 31-60%: Moderate | 61-100%: Aggressive"
+            # Investment time horizon
+            st.markdown("📅 **Investment Time Horizon**")
+            horizon_years = st.select_slider(
+                "Investment Duration",
+                options=[1, 2, 3, 5, 7, 10, 15, 20],
+                value=5,
+                format_func=lambda x: f"{x} year{'s' if x != 1 else ''}",
+                help="How long you plan to stay invested (affects risk allocation)"
             )
             
-            # Show risk profile
-            if risk_pct <= 30:
-                st.info("🛡️ **Conservative**: Capital preservation with moderate growth")
-            elif risk_pct <= 60:
-                st.info("⚖️ **Moderate**: Balanced growth with safety net")
+            # Show horizon impact
+            if horizon_years <= 2:
+                st.caption("⚡ Short-term: Focus on stability and liquidity")
+            elif horizon_years <= 5:
+                st.caption("📈 Medium-term: Balanced growth with moderate risk")
             else:
-                st.info("🚀 **Aggressive**: Maximum growth potential")
+                st.caption("🚀 Long-term: Higher growth potential, can weather volatility")
             
-            # Exclusions
-            with st.expander("⚙️ Exclusions (Optional)"):
-                try:
-                    available_sectors = get_available_sectors()
-                    available_industries = get_available_industries()
-                except:
-                    available_sectors = []
-                    available_industries = []
-                
-                exclude_sectors = st.multiselect(
-                    "Exclude Sectors",
-                    options=available_sectors,
-                    help="E.g., Tobacco, Alcohol for ethical investing"
+            # Risk appetite as fraction (0-1)
+            risk_fraction = st.slider(
+                "🎯 Risk Appetite",
+                min_value=0.0,
+                max_value=1.0,
+                value=0.30,
+                step=0.05,
+                format="%.2f",
+                help="0.0-0.30: Conservative | 0.31-0.60: Moderate | 0.61-1.0: Aggressive"
+            )
+            
+            # Convert to percentage for display
+            risk_pct = risk_fraction * 100
+            
+            # Show risk profile with dynamic adjustment based on horizon
+            if risk_fraction <= 0.30:
+                base_profile = "🛡️ **Conservative**: Capital preservation with moderate growth"
+                if horizon_years >= 10:
+                    base_profile += " (Long horizon allows for some equity exposure)"
+            elif risk_fraction <= 0.60:
+                base_profile = "⚖️ **Moderate**: Balanced growth with safety net"
+                if horizon_years <= 2:
+                    base_profile += " (Short horizon suggests more conservative allocation)"
+            else:
+                base_profile = "🚀 **Aggressive**: Maximum growth potential"
+                if horizon_years <= 3:
+                    base_profile += " (⚠️ High risk with short horizon - consider extending timeline)"
+            
+            st.info(base_profile)
+            
+            # Expected growth target (optional)
+            st.markdown("🎯 **Return Expectations** (Optional)")
+            has_growth_target = st.checkbox("Set specific return target", value=False)
+            
+            expected_growth = None
+            if has_growth_target:
+                expected_growth = st.slider(
+                    "Expected Annual Return (%)",
+                    min_value=5.0,
+                    max_value=25.0,
+                    value=12.0,
+                    step=0.5,
+                    format="%.1f%%",
+                    help="Target annual return - portfolio will be optimized towards this goal"
                 )
                 
-                exclude_industries = st.multiselect(
-                    "Exclude Industries",
-                    options=available_industries
+                # Reality check based on risk and horizon
+                if expected_growth > 18 and risk_fraction < 0.6:
+                    st.warning("⚠️ High return expectations may require higher risk appetite")
+                elif expected_growth < 8 and risk_fraction > 0.7:
+                    st.info("💡 Conservative return target with high risk tolerance - consider growth stocks")
+            
+            # Asset exclusions
+            st.markdown("🚫 **Asset Exclusions** (Optional)")
+            
+            col_ex1, col_ex2 = st.columns(2)
+            
+            with col_ex1:
+                # Symbol exclusions
+                exclude_symbols_text = st.text_area(
+                    "Exclude Specific Symbols",
+                    placeholder="RELIANCE, TCS, INFY, HDFCBANK\n(comma-separated)",
+                    height=60,
+                    help="Specific assets you don't want in your portfolio"
                 )
+                
+                # Parse symbols
+                exclude_symbols = []
+                if exclude_symbols_text.strip():
+                    exclude_symbols = [s.strip().upper() for s in exclude_symbols_text.split(',') if s.strip()]
+                
+                if exclude_symbols:
+                    st.caption(f"Excluding {len(exclude_symbols)} symbols: {', '.join(exclude_symbols[:5])}{'...' if len(exclude_symbols) > 5 else ''}")
+            
+            with col_ex2:
+                # Sector/Industry exclusions
+                with st.expander("⚙️ Sector/Industry Exclusions"):
+                    try:
+                        available_sectors = get_available_sectors()
+                        available_industries = get_available_industries()
+                    except:
+                        available_sectors = []
+                        available_industries = []
+                    
+                    exclude_sectors = st.multiselect(
+                        "Exclude Sectors",
+                        options=available_sectors,
+                        help="E.g., Tobacco, Alcohol for ethical investing"
+                    )
+                    
+                    exclude_industries = st.multiselect(
+                        "Exclude Industries",
+                        options=available_industries,
+                        help="More specific industry exclusions"
+                    )
+            
+            # Summary of parameters
+            st.markdown("---")
+            st.markdown("📋 **Portfolio Parameters Summary:**")
+            
+            summary_col1, summary_col2 = st.columns(2)
+            
+            with summary_col1:
+                st.markdown(f"""
+                - **Capital:** ₹{capital:,.2f}
+                - **Time Horizon:** {horizon_years} years
+                - **Risk Level:** {risk_fraction:.2f} ({risk_pct:.0f}%)
+                """)
+            
+            with summary_col2:
+                st.markdown(f"""
+                - **Growth Target:** {f'{expected_growth:.1f}%' if expected_growth else 'Market-based'}
+                - **Symbol Exclusions:** {len(exclude_symbols)} assets
+                - **Sector Exclusions:** {len(exclude_sectors) if 'exclude_sectors' in locals() else 0} sectors
+                """)
             
             submitted = st.form_submit_button("🎯 Generate Portfolio", use_container_width=True)
             
@@ -1726,16 +1823,16 @@ def display_portfolio_builder():
             st.markdown(f"""
             <div class="metric-card">
                 <div>💰 Capital</div>
-                <div class="metric-value">₹{meta['capital']:,.0f}</div>
+                <div class="metric-value">₹{meta['capital']:,.2f}</div>
             </div>
             """, unsafe_allow_html=True)
         
         with col2:
             st.markdown(f"""
             <div class="metric-card">
-                <div>📊 Risk Appetite</div>
-                <div class="metric-value">{meta['risk_appetite']}%</div>
-                <div>{meta['risk_profile']}</div>
+                <div>📊 Risk Level</div>
+                <div class="metric-value">{meta.get('risk', 0.3):.2f}</div>
+                <div style="font-size: 0.8rem; color: #888;">{meta.get('risk_profile', 'Moderate')}</div>
             </div>
             """, unsafe_allow_html=True)
         
