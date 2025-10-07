@@ -708,7 +708,7 @@ class DailyPriceCollector:
     
     def add_new_prices(self, prices_to_add: List[Dict]):
         """
-        Add new price records to database.
+        Add new price records to database with duplicate handling.
         
         Args:
             prices_to_add: List of new price records to add
@@ -717,41 +717,97 @@ class DailyPriceCollector:
             self.logger.info("ℹ️ No new price records to add")
             return
         
-        self.logger.info(f"[ADD] Adding {len(prices_to_add)} new price records...")
+        self.logger.info(f"[ADD] Adding {len(prices_to_add)} new price records with duplicate protection...")
         
         db = self.get_db_session()
-        added_count = 0
+        total_inserted = 0
         batch_size = 1000  # Process in batches for better performance
+        
+        # Import text for SQL execution
+        from sqlalchemy import text
         
         try:
             for i in range(0, len(prices_to_add), batch_size):
                 batch = prices_to_add[i:i + batch_size]
                 
-                for price_data in batch:
-                    new_price = DailyPrice(
-                        asset_id=price_data['asset_id'],
-                        date=price_data['date'],
-                        open_price=price_data['open_price'],
-                        high_price=price_data['high_price'],
-                        low_price=price_data['low_price'],
-                        close_price=price_data['close_price'],
-                        adj_close=price_data['adj_close'],
-                        volume=price_data['volume'],
-                        dividends=price_data['dividends'],
-                        stock_splits=price_data['stock_splits']
-                    )
+                try:
+                    # Prepare batch data for PostgreSQL array format
+                    asset_ids = [price_data['asset_id'] for price_data in batch]
+                    dates = [price_data['date'] for price_data in batch]
+                    open_prices = [float(price_data['open_price']) for price_data in batch]
+                    high_prices = [float(price_data['high_price']) for price_data in batch]
+                    low_prices = [float(price_data['low_price']) for price_data in batch]
+                    close_prices = [float(price_data['close_price']) for price_data in batch]
+                    adj_closes = [float(price_data['adj_close']) for price_data in batch]
+                    volumes = [int(price_data['volume']) for price_data in batch]
+                    dividends = [float(price_data['dividends']) for price_data in batch]
+                    stock_splits = [float(price_data['stock_splits']) for price_data in batch]
                     
-                    db.add(new_price)
-                    added_count += 1
-                
-                # Commit each batch
-                db.commit()
-                self.logger.info(f"  [BATCH] Added batch {i//batch_size + 1}: {len(batch)} records")
+                    # Use our batch insert function that handles duplicates
+                    result = db.execute(text("""
+                        SELECT batch_insert_daily_prices(
+                            :asset_ids, :dates, :open_prices, :high_prices, :low_prices,
+                            :close_prices, :adj_closes, :volumes, :dividends, :stock_splits
+                        )
+                    """), {
+                        'asset_ids': asset_ids,
+                        'dates': dates,
+                        'open_prices': open_prices,
+                        'high_prices': high_prices,
+                        'low_prices': low_prices,
+                        'close_prices': close_prices,
+                        'adj_closes': adj_closes,
+                        'volumes': volumes,
+                        'dividends': dividends,
+                        'stock_splits': stock_splits
+                    })
+                    
+                    batch_inserted = result.scalar()
+                    total_inserted += batch_inserted
+                    
+                    db.commit()
+                    
+                    self.logger.info(f"  [BATCH {i//batch_size + 1}] Inserted {batch_inserted}/{len(batch)} records (duplicates skipped)")
+                    
+                except Exception as batch_error:
+                    db.rollback()
+                    self.logger.warning(f"[BATCH {i//batch_size + 1}] Batch insert failed: {batch_error}")
+                    
+                    # Fall back to individual inserts for this batch
+                    batch_fallback_inserted = 0
+                    for price_data in batch:
+                        try:
+                            result = db.execute(text("""
+                                SELECT upsert_daily_prices(
+                                    :asset_id, :date, :open_price, :high_price, :low_price,
+                                    :close_price, :adj_close, :volume, :dividends, :stock_splits
+                                )
+                            """), {
+                                'asset_id': price_data['asset_id'],
+                                'date': price_data['date'],
+                                'open_price': float(price_data['open_price']),
+                                'high_price': float(price_data['high_price']),
+                                'low_price': float(price_data['low_price']),
+                                'close_price': float(price_data['close_price']),
+                                'adj_close': float(price_data['adj_close']),
+                                'volume': int(price_data['volume']),
+                                'dividends': float(price_data['dividends']),
+                                'stock_splits': float(price_data['stock_splits'])
+                            })
+                            db.commit()
+                            batch_fallback_inserted += 1
+                            
+                        except Exception as individual_error:
+                            db.rollback()
+                            self.logger.debug(f"[SKIP] Failed to insert {price_data['asset_id']}:{price_data['date']} - {individual_error}")
+                    
+                    total_inserted += batch_fallback_inserted
+                    self.logger.info(f"  [FALLBACK] Individually inserted {batch_fallback_inserted}/{len(batch)} records")
             
-            self.logger.info(f"[SUCCESS] Successfully added {added_count} new price records")
+            self.logger.info(f"[SUCCESS] Successfully inserted {total_inserted}/{len(prices_to_add)} new price records (duplicates gracefully handled)")
             
         except Exception as e:
-            self.logger.error(f"❌ Error adding price records: {str(e)}")
+            self.logger.error(f"❌ Critical error adding price records: {str(e)}")
             db.rollback()
 
     # ========================================

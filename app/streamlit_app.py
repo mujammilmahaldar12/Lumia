@@ -494,19 +494,42 @@ def display_asset_screener():
             submitted = st.form_submit_button("🚀 Analyze All Assets", use_container_width=True)
             
             if submitted:
-                with st.spinner(f"🤖 Expert AI analyzing ALL 2,200+ assets... (This may take 5-10 minutes)"):
-                    if recommendation_engine_available:
-                        try:
+                # Enhanced loading with detailed progress tracking
+                progress_container = st.container()
+                
+                with progress_container:
+                    # Progress indicators
+                    progress_bar = st.progress(0)
+                    status_text = st.empty()
+                    time_text = st.empty()
+                    assets_text = st.empty()
+                    
+                    try:
+                        import time as time_module
+                        start_time = time_module.time()
+                        
+                        # Stage 1: Initialization
+                        progress_bar.progress(5)
+                        status_text.info("🔍 **Stage 1/5:** Initializing expert AI analysis engine...")
+                        time_text.caption(f"⏱️ Elapsed: {time_module.time() - start_time:.1f}s")
+                        
+                        if recommendation_engine_available:
                             # Import expert engine
                             from recommendation_engine.expert_engine import ExpertRecommendationEngine
                             from models.assets import Asset
                             
                             db = next(get_db())
+                            
+                            # Stage 2: Database query
+                            progress_bar.progress(15)
+                            status_text.info("📊 **Stage 2/5:** Querying asset database...")
+                            time_text.caption(f"⏱️ Elapsed: {time_module.time() - start_time:.1f}s")
+                            
                             try:
                                 # Initialize expert engine
                                 engine = ExpertRecommendationEngine()
                                 
-                                # Get ALL assets from database (all types, not just STOCK)
+                                # Get ALL assets from database
                                 query = db.query(Asset)
                                 
                                 # Apply exclusions if any
@@ -518,31 +541,45 @@ def display_asset_screener():
                                 assets = query.all()
                                 total_assets = len(assets)
                                 
-                                st.info(f"📊 Analyzing {total_assets} assets...")
+                                # Stage 3: Setup complete
+                                progress_bar.progress(25)
+                                status_text.info(f"⚙️ **Stage 3/5:** Analysis setup complete - {total_assets:,} assets to analyze")
+                                assets_text.info(f"📈 **Scope:** All asset types | **Filter:** {action_filter} | **Target:** Top {top_picks}")
+                                time_text.caption(f"⏱️ Elapsed: {time_module.time() - start_time:.1f}s")
                                 
                                 # Map action filter
                                 action_map = {
                                     'BUY Only': 'BUY',
-                                    'SELL Only': 'SELL',
+                                    'SELL Only': 'SELL', 
                                     'HOLD Only': 'HOLD',
                                     'All Actions': None
                                 }
                                 selected_action = action_map[action_filter]
                                 
-                                # Analyze each asset
+                                # Stage 4: Analysis (main processing)
+                                progress_bar.progress(30)
+                                status_text.info("🧠 **Stage 4/5:** Running expert AI analysis on all assets...")
+                                time_text.caption(f"⏱️ Elapsed: {time_module.time() - start_time:.1f}s | **ETA:** ~{total_assets//50} minutes")
+                                
+                                # Analyze each asset with progress updates
                                 results = []
-                                progress_bar = st.progress(0)
-                                status_text = st.empty()
                                 
                                 for idx, asset in enumerate(assets):
                                     try:
-                                        # Update progress
-                                        progress = (idx + 1) / total_assets
-                                        progress_bar.progress(progress)
-                                        status_text.text(f"Progress: {idx + 1}/{total_assets} assets analyzed...")
+                                        # Update progress every 50 assets
+                                        if idx % 50 == 0:
+                                            current_progress = 30 + int((idx / total_assets) * 60)  # 30% to 90%
+                                            progress_bar.progress(current_progress)
+                                            
+                                            elapsed = time_module.time() - start_time
+                                            rate = idx / elapsed if elapsed > 0 else 0
+                                            eta = (total_assets - idx) / rate if rate > 0 else 0
+                                            
+                                            status_text.info(f"🧠 **Stage 4/5:** Analyzing asset {idx + 1:,}/{total_assets:,} ({(idx/total_assets)*100:.1f}%)")
+                                            time_text.caption(f"⏱️ Elapsed: {elapsed:.1f}s | **Rate:** {rate:.1f} assets/sec | **ETA:** {eta/60:.1f} min")
+                                            assets_text.info(f"📊 **Current:** {asset.symbol} | **Results Found:** {len(results)} | **Success Rate:** {len(results)/(idx+1)*100:.1f}%")
                                         
-                                        # Get recommendation using correct method name
-                                        # Pass db session to prevent pool exhaustion
+                                        # Get recommendation
                                         recommendation = engine.analyze_stock(
                                             symbol=asset.symbol,
                                             user_risk_profile=risk_profile,
@@ -564,17 +601,25 @@ def display_asset_screener():
                                                 })
                                     
                                     except Exception as e:
-                                        # Skip assets with errors
+                                        # Skip assets with errors but don't stop processing
                                         continue
                                 
-                                progress_bar.empty()
-                                status_text.empty()
+                                # Stage 5: Finalization
+                                progress_bar.progress(95)
+                                status_text.info("✅ **Stage 5/5:** Finalizing results and sorting by score...")
                                 
                                 # Sort by score (descending)
                                 results.sort(key=lambda x: x['score'], reverse=True)
                                 
                                 # Take top N
                                 top_results = results[:top_picks]
+                                
+                                # Complete
+                                progress_bar.progress(100)
+                                total_time = time_module.time() - start_time
+                                status_text.success(f"🎉 **Analysis Complete!** Found {len(results):,} opportunities")
+                                time_text.caption(f"⏱️ Total Time: {total_time/60:.1f} minutes ({total_time:.1f}s)")
+                                assets_text.success(f"📊 **Final Results:** {len(top_results)} top picks selected | **Success Rate:** {len(results)/total_assets*100:.1f}%")
                                 
                                 # Store in session state
                                 st.session_state.recommendations = {
@@ -588,22 +633,38 @@ def display_asset_screener():
                                 }
                                 st.session_state.error_message = None
                                 
-                                st.success(f"✅ Analysis complete! Found {len(results)} {action_filter} opportunities")
-                                time.sleep(0.5)
+                                # Clear progress after brief display
+                                time_module.sleep(2)
+                                progress_container.empty()
                                 st.rerun()
                             
                             finally:
                                 db.close()
                         
-                        except Exception as e:
-                            import traceback
-                            st.error(f"❌ Error during analysis: {str(e)}")
-                            st.code(traceback.format_exc())
-                            st.session_state.error_message = str(e)
+                        else:
+                            progress_bar.progress(0)
+                            status_text.error("❌ **AI Engine Unavailable**")
+                            st.error("❌ Recommendation engine not available")
+                            st.info("💡 Please check if recommendation_engine module is installed correctly")
+                            time_module.sleep(2)
+                            progress_container.empty()
                     
-                    else:
-                        st.error("❌ Recommendation engine not available")
-                        st.info("💡 Please check if recommendation_engine module is installed correctly")
+                    except Exception as e:
+                        # Enhanced error handling
+                        progress_bar.progress(0)
+                        status_text.error("❌ **Analysis Failed**")
+                        
+                        import traceback
+                        st.error(f"**Error during analysis:** {str(e)}")
+                        
+                        with st.expander("🔍 Technical Details", expanded=False):
+                            st.code(traceback.format_exc())
+                        
+                        st.session_state.error_message = str(e)
+                        
+                        # Clear progress after error
+                        time_module.sleep(2)
+                        progress_container.empty()
     
     # Main content area
     if st.session_state.recommendations:
@@ -1291,82 +1352,266 @@ def display_portfolio_builder():
         st.header("💼 Portfolio Parameters")
         
         with st.form("portfolio_form"):
-            # Capital input
+            # Capital input (float)
             capital = st.number_input(
-                "Total Investment Capital (₹)",
-                min_value=10000,
-                max_value=100000000,
-                value=100000,
-                step=10000,
-                help="Total amount you want to invest"
+                "💰 Total Investment Capital (₹)",
+                min_value=10000.0,
+                max_value=100000000.0,
+                value=100000.0,
+                step=1000.0,
+                format="%.2f",
+                help="Total amount you want to invest (supports decimal values)"
             )
             
-            # Risk appetite percentage
-            risk_pct = st.slider(
-                "Risk Appetite (%)",
-                min_value=0,
-                max_value=100,
-                value=30,
-                step=5,
-                help="0-30%: Conservative | 31-60%: Moderate | 61-100%: Aggressive"
+            # Investment time horizon
+            st.markdown("📅 **Investment Time Horizon**")
+            horizon_years = st.select_slider(
+                "Investment Duration",
+                options=[1, 2, 3, 5, 7, 10, 15, 20],
+                value=5,
+                format_func=lambda x: f"{x} year{'s' if x != 1 else ''}",
+                help="How long you plan to stay invested (affects risk allocation)"
             )
             
-            # Show risk profile
-            if risk_pct <= 30:
-                st.info("🛡️ **Conservative**: Capital preservation with moderate growth")
-            elif risk_pct <= 60:
-                st.info("⚖️ **Moderate**: Balanced growth with safety net")
+            # Show horizon impact
+            if horizon_years <= 2:
+                st.caption("⚡ Short-term: Focus on stability and liquidity")
+            elif horizon_years <= 5:
+                st.caption("📈 Medium-term: Balanced growth with moderate risk")
             else:
-                st.info("🚀 **Aggressive**: Maximum growth potential")
+                st.caption("🚀 Long-term: Higher growth potential, can weather volatility")
             
-            # Exclusions
-            with st.expander("⚙️ Exclusions (Optional)"):
-                try:
-                    available_sectors = get_available_sectors()
-                    available_industries = get_available_industries()
-                except:
-                    available_sectors = []
-                    available_industries = []
-                
-                exclude_sectors = st.multiselect(
-                    "Exclude Sectors",
-                    options=available_sectors,
-                    help="E.g., Tobacco, Alcohol for ethical investing"
+            # Risk appetite as fraction (0-1)
+            risk_fraction = st.slider(
+                "🎯 Risk Appetite",
+                min_value=0.0,
+                max_value=1.0,
+                value=0.30,
+                step=0.05,
+                format="%.2f",
+                help="0.0-0.30: Conservative | 0.31-0.60: Moderate | 0.61-1.0: Aggressive"
+            )
+            
+            # Convert to percentage for display
+            risk_pct = risk_fraction * 100
+            
+            # Show risk profile with dynamic adjustment based on horizon
+            if risk_fraction <= 0.30:
+                base_profile = "🛡️ **Conservative**: Capital preservation with moderate growth"
+                if horizon_years >= 10:
+                    base_profile += " (Long horizon allows for some equity exposure)"
+            elif risk_fraction <= 0.60:
+                base_profile = "⚖️ **Moderate**: Balanced growth with safety net"
+                if horizon_years <= 2:
+                    base_profile += " (Short horizon suggests more conservative allocation)"
+            else:
+                base_profile = "🚀 **Aggressive**: Maximum growth potential"
+                if horizon_years <= 3:
+                    base_profile += " (⚠️ High risk with short horizon - consider extending timeline)"
+            
+            st.info(base_profile)
+            
+            # Expected growth target (optional)
+            st.markdown("🎯 **Return Expectations** (Optional)")
+            has_growth_target = st.checkbox("Set specific return target", value=False)
+            
+            expected_growth = None
+            if has_growth_target:
+                expected_growth = st.slider(
+                    "Expected Annual Return (%)",
+                    min_value=5.0,
+                    max_value=25.0,
+                    value=12.0,
+                    step=0.5,
+                    format="%.1f%%",
+                    help="Target annual return - portfolio will be optimized towards this goal"
                 )
                 
-                exclude_industries = st.multiselect(
-                    "Exclude Industries",
-                    options=available_industries
+                # Reality check based on risk and horizon
+                if expected_growth > 18 and risk_fraction < 0.6:
+                    st.warning("⚠️ High return expectations may require higher risk appetite")
+                elif expected_growth < 8 and risk_fraction > 0.7:
+                    st.info("💡 Conservative return target with high risk tolerance - consider growth stocks")
+            
+            # Asset exclusions
+            st.markdown("🚫 **Asset Exclusions** (Optional)")
+            
+            col_ex1, col_ex2 = st.columns(2)
+            
+            with col_ex1:
+                # Symbol exclusions
+                exclude_symbols_text = st.text_area(
+                    "Exclude Specific Symbols",
+                    placeholder="RELIANCE, TCS, INFY, HDFCBANK\n(comma-separated)",
+                    height=60,
+                    help="Specific assets you don't want in your portfolio"
                 )
+                
+                # Parse symbols
+                exclude_symbols = []
+                if exclude_symbols_text.strip():
+                    exclude_symbols = [s.strip().upper() for s in exclude_symbols_text.split(',') if s.strip()]
+                
+                if exclude_symbols:
+                    st.caption(f"Excluding {len(exclude_symbols)} symbols: {', '.join(exclude_symbols[:5])}{'...' if len(exclude_symbols) > 5 else ''}")
+            
+            with col_ex2:
+                # Sector/Industry exclusions
+                with st.expander("⚙️ Sector/Industry Exclusions"):
+                    try:
+                        available_sectors = get_available_sectors()
+                        available_industries = get_available_industries()
+                    except:
+                        available_sectors = []
+                        available_industries = []
+                    
+                    exclude_sectors = st.multiselect(
+                        "Exclude Sectors",
+                        options=available_sectors,
+                        help="E.g., Tobacco, Alcohol for ethical investing"
+                    )
+                    
+                    exclude_industries = st.multiselect(
+                        "Exclude Industries",
+                        options=available_industries,
+                        help="More specific industry exclusions"
+                    )
+            
+            # Summary of parameters
+            st.markdown("---")
+            st.markdown("📋 **Portfolio Parameters Summary:**")
+            
+            summary_col1, summary_col2 = st.columns(2)
+            
+            with summary_col1:
+                st.markdown(f"""
+                - **Capital:** ₹{capital:,.2f}
+                - **Time Horizon:** {horizon_years} years
+                - **Risk Level:** {risk_fraction:.2f} ({risk_pct:.0f}%)
+                """)
+            
+            with summary_col2:
+                st.markdown(f"""
+                - **Growth Target:** {f'{expected_growth:.1f}%' if expected_growth else 'Market-based'}
+                - **Symbol Exclusions:** {len(exclude_symbols)} assets
+                - **Sector Exclusions:** {len(exclude_sectors) if 'exclude_sectors' in locals() else 0} sectors
+                """)
             
             submitted = st.form_submit_button("🎯 Generate Portfolio", use_container_width=True)
             
             if submitted:
-                with st.spinner("🤖 Building your personalized portfolio..."):
+                # Enhanced loading with progress indicators
+                progress_container = st.container()
+                
+                with progress_container:
+                    # Create progress elements
+                    progress_bar = st.progress(0)
+                    status_text = st.empty()
+                    time_text = st.empty()
+                    
+                    # Stage indicators
+                    stages = [
+                        "🔍 Analyzing parameters...",
+                        "🧠 Initializing AI engine...", 
+                        "📊 Processing asset database...",
+                        "⚖️ Optimizing allocation...",
+                        "🎯 Generating recommendations...",
+                        "✅ Finalizing portfolio..."
+                    ]
+                    
                     try:
-                        from recommendation_engine.portfolio import FinRobotPortfolio, display_portfolio
+                        import time as time_module
+                        start_time = time_module.time()
                         
-                        # Create portfolio allocator
+                        # Stage 1: Parameter validation
+                        progress_bar.progress(10)
+                        status_text.info("🔍 **Stage 1/6:** Analyzing investment parameters...")
+                        time_module.sleep(0.5)
+                        
+                        # Validate parameters
+                        if capital < 10000:
+                            st.error("❌ Minimum capital should be ₹10,000")
+                            return
+                        
+                        if risk_fraction > 0.8 and horizon_years <= 2:
+                            st.warning("⚠️ High risk with short horizon - consider extending timeline")
+                        
+                        # Stage 2: Engine initialization
+                        progress_bar.progress(25)
+                        status_text.info("🧠 **Stage 2/6:** Initializing portfolio AI engine...")
+                        time_text.caption(f"⏱️ Elapsed: {time_module.time() - start_time:.1f}s")
+                        time_module.sleep(0.3)
+                        
+                        from recommendation_engine.portfolio import FinRobotPortfolio, display_portfolio
                         allocator = FinRobotPortfolio()
                         
-                        # Generate portfolio
+                        # Stage 3: Database processing
+                        progress_bar.progress(45)
+                        status_text.info("📊 **Stage 3/6:** Processing asset database (2,200+ assets)...")
+                        time_text.caption(f"⏱️ Elapsed: {time_module.time() - start_time:.1f}s")
+                        time_module.sleep(0.5)
+                        
+                        # Prepare exclusions list
+                        all_exclusions = exclude_symbols.copy() if exclude_symbols else []
+                        
+                        # Stage 4: Allocation optimization
+                        progress_bar.progress(65)
+                        status_text.info("⚖️ **Stage 4/6:** Optimizing asset allocation strategy...")
+                        time_text.caption(f"⏱️ Elapsed: {time_module.time() - start_time:.1f}s")
+                        time_module.sleep(0.3)
+                        
+                        # Stage 5: Portfolio generation (main processing)
+                        progress_bar.progress(80)
+                        status_text.info("🎯 **Stage 5/6:** Generating personalized recommendations...")
+                        time_text.caption(f"⏱️ Elapsed: {time_module.time() - start_time:.1f}s")
+                        
+                        # Generate portfolio with enhanced parameters
                         portfolio = allocator.build_portfolio(
-                            total_capital=capital,
-                            risk_appetite=risk_pct,
-                            exclude_sectors=exclude_sectors if exclude_sectors else None,
-                            exclude_industries=exclude_industries if exclude_industries else None
+                            capital=capital,  # Now supports float
+                            risk=risk_fraction,  # 0-1 fraction instead of percentage
+                            horizon_years=horizon_years,  # Investment time horizon
+                            expected_growth=expected_growth,  # Optional growth target
+                            exclusions=all_exclusions,  # List of symbols to exclude
+                            exclude_sectors=exclude_sectors if 'exclude_sectors' in locals() and exclude_sectors else None,
+                            exclude_industries=exclude_industries if 'exclude_industries' in locals() and exclude_industries else None
                         )
+                        
+                        # Stage 6: Finalization
+                        progress_bar.progress(95)
+                        status_text.info("✅ **Stage 6/6:** Finalizing portfolio and generating insights...")
+                        time_text.caption(f"⏱️ Elapsed: {time_module.time() - start_time:.1f}s")
+                        time_module.sleep(0.2)
+                        
+                        # Complete
+                        progress_bar.progress(100)
+                        total_time = time_module.time() - start_time
+                        status_text.success(f"🎉 **Portfolio Generated Successfully!** ✨")
+                        time_text.caption(f"⏱️ Total Time: {total_time:.1f}s")
                         
                         # Store in session state
                         st.session_state['portfolio'] = portfolio
-                        st.success("✅ Portfolio generated successfully!")
-                        time.sleep(0.5)
+                        
+                        # Clear progress indicators after short display
+                        time_module.sleep(1.5)
+                        progress_container.empty()
+                        
+                        # Auto-refresh to show results
                         st.rerun()
-                    
+                        
                     except Exception as e:
+                        # Enhanced error display
+                        progress_bar.progress(0)
+                        status_text.error("❌ **Portfolio Generation Failed**")
+                        
                         import traceback
-                        st.error(f"❌ Error generating portfolio: {str(e)}")
-                        st.code(traceback.format_exc())
+                        st.error(f"**Error:** {str(e)}")
+                        
+                        with st.expander("🔍 Technical Details", expanded=False):
+                            st.code(traceback.format_exc())
+                        
+                        # Clear progress after error
+                        time_module.sleep(2)
+                        progress_container.empty()
     
     # Display portfolio if generated
     if 'portfolio' in st.session_state and st.session_state['portfolio']:
@@ -1377,30 +1622,40 @@ def display_portfolio_builder():
         reasoning = portfolio['reasoning']
         
         # Summary cards
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
         
         with col1:
             st.markdown(f"""
             <div class="metric-card">
                 <div>💰 Capital</div>
-                <div class="metric-value">₹{meta['capital']:,.0f}</div>
+                <div class="metric-value">₹{meta['capital']:,.2f}</div>
             </div>
             """, unsafe_allow_html=True)
         
         with col2:
             st.markdown(f"""
             <div class="metric-card">
-                <div>📊 Risk Appetite</div>
-                <div class="metric-value">{meta['risk_appetite']}%</div>
-                <div>{meta['risk_profile']}</div>
+                <div>📊 Risk Level</div>
+                <div class="metric-value">{meta.get('risk', 0.3):.2f}</div>
+                <div style="font-size: 0.8rem; color: #888;">{meta.get('risk_profile', 'Moderate')}</div>
             </div>
             """, unsafe_allow_html=True)
         
         with col3:
             st.markdown(f"""
             <div class="metric-card">
-                <div>📅 Generated</div>
-                <div style="font-size: 1rem; color: #888;">{meta['generated_at']}</div>
+                <div>📅 Time Horizon</div>
+                <div class="metric-value">{meta.get('horizon_years', 5)} yrs</div>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col4:
+            growth_target = meta.get('expected_growth')
+            st.markdown(f"""
+            <div class="metric-card">
+                <div>🎯 Target Return</div>
+                <div class="metric-value">{f'{growth_target:.1f}%' if growth_target else 'Market'}</div>
+                <div style="font-size: 0.8rem; color: #888;">{'Annual' if growth_target else 'Based'}</div>
             </div>
             """, unsafe_allow_html=True)
         
@@ -1629,43 +1884,81 @@ ALLOCATION:
             <h2 style="color: #667eea;">👈 Configure & Generate</h2>
             <p style="font-size: 1.2rem; color: #888;">Enter your investment details and click <strong>Generate Portfolio</strong></p>
             <br>
-            <div style="text-align: left; max-width: 700px; margin: 0 auto; padding: 2rem; background: rgba(255,255,255,0.05); border-radius: 10px;">
-                <h3 style="color: #667eea;">💼 What is FinRobot Portfolio Builder?</h3>
-                <p>Unlike traditional systems that just show "Top 20 stocks", this builds a <strong>COMPLETE investment strategy</strong>:</p>
+            <div style="text-align: left; max-width: 800px; margin: 0 auto; padding: 2rem; background: rgba(255,255,255,0.05); border-radius: 10px;">
+                <h3 style="color: #667eea;">💼 Enhanced FinRobot Portfolio Builder</h3>
+                <p>Professional-grade portfolio allocation with advanced parameter controls:</p>
                 <ul style="line-height: 2;">
-                    <li><strong>Multi-Asset Allocation:</strong> Automatically distributes capital across Stocks, ETFs, Mutual Funds, FDs, and Crypto</li>
-                    <li><strong>Risk-Based Strategy:</strong> Allocation changes based on your risk appetite (Conservative/Moderate/Aggressive)</li>
-                    <li><strong>Specific Recommendations:</strong> Top picks in each category with exact investment amounts</li>
-                    <li><strong>AI Reasoning:</strong> FinGPT-powered explanation of WHY this allocation suits your profile</li>
+                    <li><strong>💰 Flexible Capital:</strong> Support for precise amounts (decimals allowed)</li>
+                    <li><strong>📅 Time Horizon:</strong> 1-20 year investment periods with dynamic allocation</li>
+                    <li><strong>🎯 Risk Control:</strong> Precise 0.0-1.0 risk fraction for fine-tuned allocation</li>
+                    <li><strong>📈 Growth Targets:</strong> Optional return expectations (5-25% annually)</li>
+                    <li><strong>🚫 Smart Exclusions:</strong> Symbol-specific and sector-based filtering</li>
+                    <li><strong>🤖 AI Reasoning:</strong> FinGPT-powered explanation of allocation strategy</li>
                 </ul>
                 <br>
-                <h3 style="color: #667eea;">📊 Allocation Strategies</h3>
-                <table style="width: 100%; margin-top: 1rem;">
-                    <tr style="background: rgba(255,255,255,0.05);">
-                        <th style="padding: 0.5rem; text-align: left;">Risk Profile</th>
-                        <th style="padding: 0.5rem;">Equity</th>
-                        <th style="padding: 0.5rem;">Debt</th>
-                        <th style="padding: 0.5rem;">Returns</th>
-                    </tr>
-                    <tr>
-                        <td style="padding: 0.5rem;">Conservative (0-30%)</td>
-                        <td style="padding: 0.5rem; text-align: center;">35%</td>
-                        <td style="padding: 0.5rem; text-align: center;">60%</td>
-                        <td style="padding: 0.5rem; text-align: center;">6-9%</td>
-                    </tr>
-                    <tr style="background: rgba(255,255,255,0.05);">
-                        <td style="padding: 0.5rem;">Moderate (31-60%)</td>
-                        <td style="padding: 0.5rem; text-align: center;">55%</td>
-                        <td style="padding: 0.5rem; text-align: center;">40%</td>
-                        <td style="padding: 0.5rem; text-align: center;">9-13%</td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 0.5rem;">Aggressive (61-100%)</td>
-                        <td style="padding: 0.5rem; text-align: center;">75%</td>
-                        <td style="padding: 0.5rem; text-align: center;">20%</td>
-                        <td style="padding: 0.5rem; text-align: center;">13-18%</td>
-                    </tr>
-                </table>
+                <h3 style="color: #667eea;">📊 Dynamic Allocation Framework</h3>
+                <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
+                    <h4 style="color: #f093fb; margin-bottom: 1rem;">Time Horizon Impact:</h4>
+                    <table style="width: 100%; font-size: 0.9rem;">
+                        <tr style="background: rgba(255,255,255,0.05);">
+                            <th style="padding: 0.5rem; text-align: left;">Duration</th>
+                            <th style="padding: 0.5rem;">Strategy</th>
+                            <th style="padding: 0.5rem;">Risk Adjustment</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;">1-2 years</td>
+                            <td style="padding: 0.5rem;">Stability focus</td>
+                            <td style="padding: 0.5rem;">-20% equity allocation</td>
+                        </tr>
+                        <tr style="background: rgba(255,255,255,0.03);">
+                            <td style="padding: 0.5rem;">3-5 years</td>
+                            <td style="padding: 0.5rem;">Balanced growth</td>
+                            <td style="padding: 0.5rem;">Standard allocation</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;">10+ years</td>
+                            <td style="padding: 0.5rem;">Growth maximization</td>
+                            <td style="padding: 0.5rem;">+15% equity allocation</td>
+                        </tr>
+                    </table>
+                </div>
+                <div style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; margin: 1rem 0;">
+                    <h4 style="color: #4facfe; margin-bottom: 1rem;">Risk Fraction Guide:</h4>
+                    <table style="width: 100%; font-size: 0.9rem;">
+                        <tr style="background: rgba(255,255,255,0.05);">
+                            <th style="padding: 0.5rem; text-align: left;">Risk Level</th>
+                            <th style="padding: 0.5rem;">Fraction</th>
+                            <th style="padding: 0.5rem;">Typical Allocation</th>
+                            <th style="padding: 0.5rem;">Expected Return</th>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;">Conservative</td>
+                            <td style="padding: 0.5rem;">0.0 - 0.30</td>
+                            <td style="padding: 0.5rem;">30% Equity, 65% Debt</td>
+                            <td style="padding: 0.5rem;">6-9%</td>
+                        </tr>
+                        <tr style="background: rgba(255,255,255,0.03);">
+                            <td style="padding: 0.5rem;">Moderate</td>
+                            <td style="padding: 0.5rem;">0.31 - 0.60</td>
+                            <td style="padding: 0.5rem;">55% Equity, 40% Debt</td>
+                            <td style="padding: 0.5rem;">9-13%</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem;">Aggressive</td>
+                            <td style="padding: 0.5rem;">0.61 - 1.0</td>
+                            <td style="padding: 0.5rem;">75% Equity, 20% Debt</td>
+                            <td style="padding: 0.5rem;">13-18%</td>
+                        </tr>
+                    </table>
+                </div>
+                <h3 style="color: #667eea;">⚡ New Features</h3>
+                <ul style="line-height: 2;">
+                    <li>✅ <strong>Precision Control:</strong> Float capital, 0.05 risk increments, multi-year horizons</li>
+                    <li>✅ <strong>Growth Targeting:</strong> Set specific return expectations for optimized allocation</li>
+                    <li>✅ <strong>Advanced Exclusions:</strong> Symbol blacklists + ethical sector filtering</li>
+                    <li>✅ <strong>Smart Validation:</strong> Risk-return compatibility checks and warnings</li>
+                    <li>✅ <strong>Time-Aware:</strong> Allocation adjusts based on investment horizon</li>
+                </ul>
             </div>
         </div>
         """, unsafe_allow_html=True)
