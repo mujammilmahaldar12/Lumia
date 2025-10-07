@@ -86,83 +86,190 @@ def get_available_industries() -> list[str]:
 
 # Page configuration
 st.set_page_config(
-    page_title="Lumia - AI Investment Advisor",
-    page_icon="💼",
+    page_title="Lumia - Professional Investment Advisory",
+    page_icon="◆",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Simple CSS
+# Professional CSS - Clean, Modern Design
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    * {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    
     .main {
-        background-color: #0e1117;
-        padding: 2rem;
+        background: linear-gradient(180deg, #0a0e1a 0%, #1a1f2e 100%);
+        padding: 2rem 3rem;
     }
     
     .main-header {
         text-align: center;
-        padding: 2rem 1rem;
-        margin-bottom: 2rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 12px;
+        padding: 3rem 2rem;
+        margin-bottom: 3rem;
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
         color: white;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .main-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+    
+    .main-header p {
+        font-size: 1.1rem;
+        font-weight: 400;
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
     }
     
     .metric-card {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-        padding: 1.5rem;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 1.8rem 1.5rem;
         text-align: center;
         margin: 0.5rem 0;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(59, 130, 246, 0.3);
+        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+    }
+    
+    .metric-card div:first-child {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94a3b8;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
     }
     
     .metric-value {
-        font-size: 2rem;
+        font-size: 2.2rem;
         font-weight: 700;
-        color: #667eea;
+        background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         margin: 0.5rem 0;
     }
     
     .stock-card {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-        padding: 1rem;
-        margin: 0.5rem 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 0.8rem 0;
+        transition: all 0.3s ease;
+    }
+    
+    .stock-card:hover {
+        border-color: rgba(59, 130, 246, 0.3);
+        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.1);
     }
     
     .score-badge {
         display: inline-block;
-        padding: 0.3rem 0.8rem;
-        border-radius: 20px;
+        padding: 0.4rem 1rem;
+        border-radius: 8px;
         font-weight: 600;
-        margin: 0.2rem;
+        margin: 0.3rem 0.2rem;
+        font-size: 0.85rem;
+        letter-spacing: 0.3px;
+        transition: all 0.2s ease;
+    }
+    
+    .score-badge:hover {
+        transform: scale(1.05);
     }
     
     .score-excellent {
-        background: rgba(76, 175, 80, 0.3);
-        color: #4caf50;
-        border: 1px solid #4caf50;
+        background: rgba(34, 197, 94, 0.15);
+        color: #22c55e;
+        border: 1px solid rgba(34, 197, 94, 0.3);
     }
     
     .score-good {
-        background: rgba(33, 150, 243, 0.3);
-        color: #2196f3;
-        border: 1px solid #2196f3;
+        background: rgba(59, 130, 246, 0.15);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.3);
     }
     
     .score-moderate {
-        background: rgba(255, 152, 0, 0.3);
-        color: #ff9800;
-        border: 1px solid #ff9800;
+        background: rgba(251, 191, 36, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(251, 191, 36, 0.3);
     }
     
     .score-poor {
-        background: rgba(244, 67, 54, 0.3);
-        color: #f44336;
-        border: 1px solid #f44336;
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    /* Professional button styling */
+    .stButton > button {
+        background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+    }
+    
+    /* Tab styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 0.5rem;
+        background-color: transparent;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        background-color: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        color: #94a3b8;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);
+        border-color: rgba(59, 130, 246, 0.4);
+        color: #3b82f6;
+    }
+    
+    /* Expander styling */
+    .streamlit-expanderHeader {
+        background-color: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        font-weight: 500;
+    }
+    
+    /* Remove default icons, use clean typography */
+    h1, h2, h3 {
+        font-weight: 700;
+        letter-spacing: -0.5px;
     }
 
 </style>
@@ -211,7 +318,7 @@ def display_recommendations(recommendations: dict):
     reasoning = recommendations.get('reasoning', '')
     
     # Display portfolio summary metrics
-    st.header("📊 Portfolio Overview")
+    st.header("Portfolio Overview")
     
     col1, col2, col3, col4 = st.columns(4)
     
@@ -252,7 +359,7 @@ def display_recommendations(recommendations: dict):
         """, unsafe_allow_html=True)
     
     # Tabs for different views
-    tab1, tab2, tab3, tab4 = st.tabs(["📈 Assets", "🎯 Allocation", "📝 Reasoning", "⚠️ Risks"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Assets", "Allocation", "Reasoning", "Risk Analysis"])
     
     with tab1:
         st.subheader("Recommended Assets")
@@ -407,7 +514,7 @@ def display_asset_screener():
     """Asset Screener - Original functionality"""
     # Sidebar for input parameters
     with st.sidebar:
-        st.header("📊 Investment Parameters")
+        st.header("Investment Parameters")
         
         # Check if recommendation engine is available
         if recommendation_engine_available:
@@ -494,118 +601,135 @@ def display_asset_screener():
             submitted = st.form_submit_button("🚀 Analyze All Assets", use_container_width=True)
             
             if submitted:
-                with st.spinner(f"🤖 Expert AI analyzing ALL 2,200+ assets... (This may take 5-10 minutes)"):
-                    if recommendation_engine_available:
-                        try:
-                            # Import expert engine
-                            from recommendation_engine.expert_engine import ExpertRecommendationEngine
-                            from models.assets import Asset
-                            
-                            db = next(get_db())
-                            try:
-                                # Initialize expert engine
-                                engine = ExpertRecommendationEngine()
-                                
-                                # Get ALL assets from database (all types, not just STOCK)
-                                query = db.query(Asset)
-                                
-                                # Apply exclusions if any
-                                if exclude_sectors:
-                                    query = query.filter(~Asset.sector.in_(exclude_sectors))
-                                if exclude_industries:
-                                    query = query.filter(~Asset.industry.in_(exclude_industries))
-                                
-                                assets = query.all()
-                                total_assets = len(assets)
-                                
-                                st.info(f"📊 Analyzing {total_assets} assets...")
-                                
-                                # Map action filter
-                                action_map = {
-                                    'BUY Only': 'BUY',
-                                    'SELL Only': 'SELL',
-                                    'HOLD Only': 'HOLD',
-                                    'All Actions': None
-                                }
-                                selected_action = action_map[action_filter]
-                                
-                                # Analyze each asset
-                                results = []
-                                progress_bar = st.progress(0)
-                                status_text = st.empty()
-                                
-                                for idx, asset in enumerate(assets):
-                                    try:
-                                        # Update progress
-                                        progress = (idx + 1) / total_assets
-                                        progress_bar.progress(progress)
-                                        status_text.text(f"Progress: {idx + 1}/{total_assets} assets analyzed...")
-                                        
-                                        # Get recommendation using correct method name
-                                        # Pass db session to prevent pool exhaustion
-                                        recommendation = engine.analyze_stock(
-                                            symbol=asset.symbol,
-                                            user_risk_profile=risk_profile,
-                                            news_headlines=None,
-                                            db_session=db
-                                        )
-                                        
-                                        if recommendation:
-                                            action = recommendation['recommendation']['action']
-                                            score = recommendation['recommendation']['overall_score']
-                                            
-                                            # Filter by action if specified
-                                            if selected_action is None or action == selected_action:
-                                                results.append({
-                                                    'asset': asset,
-                                                    'recommendation': recommendation,
-                                                    'score': score,
-                                                    'action': action
-                                                })
-                                    
-                                    except Exception as e:
-                                        # Skip assets with errors
-                                        continue
-                                
-                                progress_bar.empty()
-                                status_text.empty()
-                                
-                                # Sort by score (descending)
-                                results.sort(key=lambda x: x['score'], reverse=True)
-                                
-                                # Take top N
-                                top_results = results[:top_picks]
-                                
-                                # Store in session state
-                                st.session_state.recommendations = {
-                                    'results': top_results,
-                                    'total_analyzed': total_assets,
-                                    'total_found': len(results),
-                                    'risk_profile': risk_profile,
-                                    'risk_percentage': risk_percentage,
-                                    'action_filter': action_filter,
-                                    'capital': capital
-                                }
-                                st.session_state.error_message = None
-                                
-                                st.success(f"✅ Analysis complete! Found {len(results)} {action_filter} opportunities")
-                                time.sleep(0.5)
-                                st.rerun()
-                            
-                            finally:
-                                db.close()
-                        
-                        except Exception as e:
-                            import traceback
-                            st.error(f"❌ Error during analysis: {str(e)}")
-                            st.code(traceback.format_exc())
-                            st.session_state.error_message = str(e)
+                # Initialize progress display
+                st.markdown("### 🔬 Professional Asset Analysis")
+                st.markdown("*Analyzing all assets with real data from news, prices, and fundamentals...*")
+                
+                progress_container = st.container()
+                progress_bar = st.progress(0)
+                status_text = st.empty()
+                
+                if recommendation_engine_available:
+                    # Import professional analyzer
+                    from recommendation_engine.professional_portfolio import ProfessionalPortfolioAnalyzer
+                    from models.assets import Asset
+                    from database import SessionLocal
                     
-                    else:
-                        st.error("❌ Recommendation engine not available")
-                        st.info("💡 Please check if recommendation_engine module is installed correctly")
-    
-    # Main content area
+                    db = SessionLocal()
+                    
+                    try:
+                        # Get ALL assets from database
+                        query = db.query(Asset)
+                        
+                        # Apply exclusions if any
+                        if exclude_sectors:
+                            query = query.filter(~Asset.sector.in_(exclude_sectors))
+                        if exclude_industries:
+                            query = query.filter(~Asset.industry.in_(exclude_industries))
+                        
+                        assets = query.all()
+                        total_assets = len(assets)
+                        
+                        st.info(f"📊 Analyzing {total_assets} assets with professional analysis...")
+                        
+                        # Initialize professional analyzer
+                        def progress_callback(progress_data):
+                            """Update progress display"""
+                            total_steps = progress_data['total_steps']
+                            steps = progress_data['steps']
+                            
+                            # Update progress bar
+                            progress_pct = min(total_steps / (total_assets * 12), 1.0)  # ~12 steps per asset
+                            progress_bar.progress(progress_pct)
+                            
+                            # Update status
+                            if steps:
+                                latest = steps[-1]
+                                status_text.markdown(
+                                    f"**{total_steps}/{total_assets * 12} steps** | Current: {latest['name']} *({latest['duration']:.2f}s)*"
+                                )
+                        
+                        analyzer = ProfessionalPortfolioAnalyzer(progress_callback=progress_callback)
+                        
+                        # Map action filter
+                        action_map = {
+                            'BUY Only': 'BUY',
+                            'SELL Only': 'SELL',
+                            'HOLD Only': 'HOLD',
+                            'All Actions': None
+                        }
+                        selected_action = action_map[action_filter]
+                        
+                        # Analyze each asset
+                        results = []
+                        
+                        for idx, asset in enumerate(assets):
+                            try:
+                                # Perform professional analysis
+                                analysis = analyzer.analyze_asset(db, asset, allocation_amount=100000)
+                                
+                                if analysis:
+                                    score = analysis['scores']['overall']
+                                    
+                                    # Determine action based on score
+                                    if score >= 75:
+                                        action = 'BUY'
+                                elif score >= 50:
+                                    action = 'HOLD'
+                                else:
+                                    action = 'SELL'
+                                
+                                # Filter by action if specified
+                                if selected_action is None or action == selected_action:
+                                    results.append({
+                                        'asset': asset,
+                                        'analysis': analysis,
+                                        'score': score,
+                                        'action': action
+                                    })
+                            
+                            except Exception as e:
+                                print(f"[SCREENER] Error analyzing {asset.symbol}: {e}")
+                                continue
+                        
+                        progress_bar.empty()
+                        status_text.empty()
+                        
+                        # Sort by score (descending)
+                        results.sort(key=lambda x: x['score'], reverse=True)
+                        
+                        # Take top N
+                        top_results = results[:top_picks]
+                        
+                        # Store in session state
+                        st.session_state.recommendations = {
+                            'results': top_results,
+                            'total_analyzed': total_assets,
+                            'total_found': len(results),
+                            'risk_profile': risk_profile,
+                            'risk_percentage': risk_percentage,
+                            'action_filter': action_filter,
+                            'capital': capital,
+                            'use_professional': True  # Flag to use professional display
+                        }
+                        st.session_state.error_message = None
+                        
+                        st.success(f"✅ Professional analysis complete! Found {len(results)} {action_filter} opportunities")
+                        time.sleep(0.5)
+                        st.rerun()
+                    
+                    except Exception as e:
+                        import traceback
+                        st.error(f"❌ Error during analysis: {str(e)}")
+                        st.code(traceback.format_exc())
+                        st.session_state.error_message = str(e)
+                    
+                    finally:
+                        db.close()
+                
+                else:
+                    st.error("❌ Recommendation engine not available")
+                    st.info("💡 Please check if recommendation_engine module is installed correctly")    # Main content area
     if st.session_state.recommendations:
         # New expert recommendations display
         if 'results' in st.session_state.recommendations:
@@ -663,9 +787,10 @@ def display_expert_recommendations(data: dict):
     risk_percentage = data.get('risk_percentage', 40)
     action_filter = data.get('action_filter', 'All Actions')
     capital = data.get('capital', 0)
+    use_professional = data.get('use_professional', False)  # Check if using professional analysis
     
     # Summary section
-    st.header("📊 Expert Analysis Results")
+    st.header("Analysis Results")
     
     col1, col2, col3, col4 = st.columns(4)
     
@@ -708,14 +833,35 @@ def display_expert_recommendations(data: dict):
     
     for idx, result in enumerate(results, 1):
         asset = result['asset']
-        rec = result['recommendation']
-        action = rec['recommendation']['action']
-        overall_score = rec['recommendation']['overall_score']
-        confidence = rec['recommendation']['confidence']
         
-        scores = rec['scores']
-        reasoning = rec.get('reasoning', {})
-        targets = rec.get('targets', {})
+        # Handle both professional and old format
+        if use_professional or 'analysis' in result:
+            # Professional analysis format
+            analysis = result.get('analysis', {})
+            action = result.get('action', 'HOLD')
+            overall_score = analysis.get('scores', {}).get('overall', 0)
+            confidence = analysis.get('confidence', overall_score)
+            
+            scores = analysis.get('scores', {})
+            reasoning = analysis.get('reasoning', '')
+            targets = {}
+            
+            # Extract professional analysis data
+            data_quality = analysis.get('data_quality', {})
+            news_analysis = analysis.get('news_analysis', {})
+            technical = analysis.get('technical_analysis', {})
+            fundamental = analysis.get('fundamental_analysis', {})
+            
+        else:
+            # Old format
+            rec = result['recommendation']
+            action = rec['recommendation']['action']
+            overall_score = rec['recommendation']['overall_score']
+            confidence = rec['recommendation']['confidence']
+            
+            scores = rec['scores']
+            reasoning = rec.get('reasoning', {})
+            targets = rec.get('targets', {})
         
         # Action emoji
         action_emoji = {
@@ -793,6 +939,68 @@ def display_expert_recommendations(data: dict):
                 
                 with col_t3:
                     st.metric("Stop Loss", f"₹{stop_loss:,.2f}")
+            
+            # Professional Analysis Data (if available)
+            if use_professional or 'analysis' in result:
+                st.markdown("---")
+                st.markdown("### 📊 Professional Analysis Report")
+                
+                # Data Quality
+                if data_quality:
+                    col_dq1, col_dq2, col_dq3 = st.columns(3)
+                    with col_dq1:
+                        st.metric("📰 News Articles", f"{data_quality.get('news_articles', 0)} articles")
+                    with col_dq2:
+                        st.metric("📈 Price Data", f"{data_quality.get('price_points', 0)} points")
+                    with col_dq3:
+                        st.metric("💼 Fundamentals", data_quality.get('fundamentals_quarter', 'N/A'))
+                
+                # News Analysis
+                if news_analysis and news_analysis.get('news_count', 0) > 0:
+                    st.markdown("#### 📰 News Sentiment")
+                    col_ns1, col_ns2, col_ns3, col_ns4 = st.columns(4)
+                    with col_ns1:
+                        st.metric("Sentiment", f"{news_analysis.get('avg_sentiment', 0)*100:.1f}/100")
+                    with col_ns2:
+                        st.metric("✅ Positive", news_analysis.get('positive_count', 0))
+                    with col_ns3:
+                        st.metric("⚠️ Neutral", news_analysis.get('neutral_count', 0))
+                    with col_ns4:
+                        st.metric("❌ Negative", news_analysis.get('negative_count', 0))
+                
+                # Technical Analysis
+                if technical:
+                    st.markdown("#### 📈 Technical Indicators")
+                    col_ta1, col_ta2, col_ta3, col_ta4 = st.columns(4)
+                    if technical.get('sma_20'):
+                        with col_ta1:
+                            st.metric("SMA 20", f"₹{technical['sma_20']:,.2f}")
+                    if technical.get('sma_50'):
+                        with col_ta2:
+                            st.metric("SMA 50", f"₹{technical['sma_50']:,.2f}")
+                    if technical.get('rsi'):
+                        with col_ta3:
+                            st.metric("RSI", f"{technical['rsi']:.1f}")
+                    if technical.get('volatility'):
+                        with col_ta4:
+                            st.metric("Volatility", f"{technical['volatility']:.1f}%")
+                
+                # Fundamental Analysis
+                if fundamental:
+                    st.markdown("#### 💼 Fundamentals")
+                    col_fa1, col_fa2, col_fa3, col_fa4 = st.columns(4)
+                    if fundamental.get('pe_ratio'):
+                        with col_fa1:
+                            st.metric("P/E Ratio", f"{fundamental['pe_ratio']:.2f}")
+                    if fundamental.get('roe'):
+                        with col_fa2:
+                            st.metric("ROE", f"{fundamental['roe']:.2f}%")
+                    if fundamental.get('debt_to_equity'):
+                        with col_fa3:
+                            st.metric("D/E", f"{fundamental['debt_to_equity']:.2f}")
+                    if fundamental.get('current_ratio'):
+                        with col_fa4:
+                            st.metric("Current Ratio", f"{fundamental['current_ratio']:.2f}")
             
             # Reasoning
             if reasoning:
@@ -1281,14 +1489,14 @@ def display_asset_deep_insights(symbol, pick, db):
 
 def display_portfolio_builder():
     """FinRobot-Style Portfolio Builder"""
-    st.header("🤖 FinRobot Portfolio Allocator")
+    st.header("Professional Portfolio Builder")
     st.markdown("""
     Complete robo-advisor that builds a **diversified investment strategy** across ALL asset types.
     Not just "Top 20 stocks" - a complete allocation guide with AI reasoning!
     """)
     
     with st.sidebar:
-        st.header("💼 Portfolio Parameters")
+        st.header("Portfolio Configuration")
         
         with st.form("portfolio_form"):
             # Capital input
@@ -1342,31 +1550,166 @@ def display_portfolio_builder():
             submitted = st.form_submit_button("🎯 Generate Portfolio", use_container_width=True)
             
             if submitted:
-                with st.spinner("🤖 Building your personalized portfolio..."):
-                    try:
-                        from recommendation_engine.portfolio import FinRobotPortfolio, display_portfolio
-                        
-                        # Create portfolio allocator
-                        allocator = FinRobotPortfolio()
-                        
-                        # Generate portfolio
-                        portfolio = allocator.build_portfolio(
-                            total_capital=capital,
-                            risk_appetite=risk_pct,
-                            exclude_sectors=exclude_sectors if exclude_sectors else None,
-                            exclude_industries=exclude_industries if exclude_industries else None
-                        )
-                        
-                        # Store in session state
-                        st.session_state['portfolio'] = portfolio
-                        st.success("✅ Portfolio generated successfully!")
-                        time.sleep(0.5)
-                        st.rerun()
+                # Initialize progress display
+                st.markdown("### 🔬 Professional Portfolio Analysis")
+                st.markdown("*Performing comprehensive analysis with real data from news, prices, and fundamentals...*")
+                
+                progress_container = st.container()
+                progress_bar = st.progress(0)
+                status_text = st.empty()
+                steps_expander = st.expander("📋 Detailed Analysis Steps", expanded=True)
+                steps_placeholder = st.empty()
+                
+                all_steps = []
+                
+                def update_progress(progress_data):
+                    """Update progress display"""
+                    nonlocal all_steps
+                    total_steps = progress_data['total_steps']
+                    steps = progress_data['steps']
+                    all_steps = steps
                     
-                    except Exception as e:
-                        import traceback
-                        st.error(f"❌ Error generating portfolio: {str(e)}")
+                    # Update progress bar (assume ~50 total steps)
+                    progress_pct = min(total_steps / 50, 1.0)
+                    progress_bar.progress(progress_pct)
+                    
+                    # Update current status
+                    if steps:
+                        latest = steps[-1]
+                        status_text.markdown(
+                            f"**Current:** {latest['name']} *({latest['duration']:.2f}s)*"
+                        )
+                    
+                    # Show last 15 steps
+                    with steps_expander:
+                        steps_html = ""
+                        for step in steps[-15:]:
+                            icon = "✅" if step['duration'] > 0 else "⏳"
+                            steps_html += f"{icon} **{step['name']}** - {step['details']} *({step['duration']:.2f}s)*\n\n"
+                        steps_placeholder.markdown(steps_html)
+                
+                try:
+                    from recommendation_engine.professional_portfolio import (
+                        ProfessionalPortfolioAnalyzer,
+                        IntelligentAssetSelector
+                    )
+                    from recommendation_engine.portfolio import FinRobotPortfolio
+                    from database import SessionLocal
+                    
+                    # Start analysis
+                    analyzer = ProfessionalPortfolioAnalyzer(progress_callback=update_progress)
+                    analyzer.progress.start_analysis()
+                    
+                    # STEP 1: Capital analysis
+                    update_progress({
+                        'total_steps': 1,
+                        'steps': [{
+                            'name': '💰 Analyzing capital',
+                            'details': f'Processing Rs {capital:,.0f} with {risk_pct}% risk appetite',
+                            'duration': 0.5
+                        }]
+                    })
+                    time.sleep(0.5)
+                    
+                    # STEP 2: Asset selection
+                    profile = 'conservative' if risk_pct < 40 else 'aggressive' if risk_pct > 70 else 'moderate'
+                    selector = IntelligentAssetSelector()
+                    included_assets = selector.select_asset_types(capital, profile)
+                    
+                    asset_types_str = ', '.join([k.upper() for k, v in included_assets.items() if v])
+                    update_progress({
+                        'total_steps': 2,
+                        'steps': all_steps + [{
+                            'name': '🎯 Asset selection complete',
+                            'details': f'Selected {sum(included_assets.values())} types: {asset_types_str}',
+                            'duration': 0.3
+                        }]
+                    })
+                    time.sleep(0.3)
+                    
+                    # STEP 3: Use traditional portfolio builder with progress tracking
+                    update_progress({
+                        'total_steps': 3,
+                        'steps': all_steps + [{
+                            'name': '📊 Building portfolio',
+                            'details': 'Applying capital allocation strategy...',
+                            'duration': 0.5
+                        }]
+                    })
+                    
+                    allocator = FinRobotPortfolio()
+                    portfolio = allocator.build_portfolio(
+                        total_capital=capital,
+                        risk_appetite=risk_pct,
+                        exclude_sectors=exclude_sectors if exclude_sectors else None,
+                        exclude_industries=exclude_industries if exclude_industries else None
+                    )
+                    
+                    # STEP 4: Enhance each recommendation with professional analysis
+                    db = SessionLocal()
+                    try:
+                        step_count = 3
+                        for asset_type in ['stocks', 'etf', 'mutual_fund', 'crypto']:
+                            if asset_type not in portfolio['picks']:
+                                continue
+                            
+                            picks = portfolio['picks'][asset_type].get('picks', [])
+                            for i, pick in enumerate(picks):
+                                step_count += 1
+                                symbol = pick.get('symbol', pick.get('name', 'Unknown'))
+                                
+                                update_progress({
+                                    'total_steps': step_count,
+                                    'steps': all_steps + [{
+                                        'name': f'🔍 Analyzing {symbol}',
+                                        'details': f'Starting comprehensive analysis...',
+                                        'duration': 0
+                                    }]
+                                })
+                                
+                                # Query asset from database
+                                from models.assets import Asset
+                                asset = db.query(Asset).filter(Asset.symbol == symbol).first()
+                                
+                                if asset:
+                                    # Perform real analysis
+                                    analysis = analyzer.analyze_asset(
+                                        db, asset, allocation_amount=pick.get('allocation', 0)
+                                    )
+                                    
+                                    # Store analysis in pick
+                                    pick['professional_analysis'] = analysis
+                                    pick['data_quality'] = analysis['data_quality']
+                                    
+                        update_progress({
+                            'total_steps': step_count + 1,
+                            'steps': all_steps + [{
+                                'name': '✅ Analysis complete',
+                                'details': f'Portfolio generated with {step_count} analysis steps',
+                                'duration': analyzer.progress.get_progress()['total_time']
+                            }]
+                        })
+                        
+                    finally:
+                        db.close()
+                    
+                    # Store in session state
+                    st.session_state['portfolio'] = portfolio
+                    st.session_state['analysis_steps'] = all_steps
+                    
+                    # Complete
+                    progress_bar.progress(1.0)
+                    total_time = analyzer.progress.get_progress()['total_time']
+                    st.success(f"✅ Professional analysis complete! Total time: {total_time:.1f} seconds | {step_count} steps executed")
+                    time.sleep(1)
+                    st.rerun()
+                
+                except Exception as e:
+                    import traceback
+                    st.error(f"❌ Error during analysis: {str(e)}")
+                    with st.expander("🐛 Error Details"):
                         st.code(traceback.format_exc())
+
     
     # Display portfolio if generated
     if 'portfolio' in st.session_state and st.session_state['portfolio']:
@@ -1376,8 +1719,8 @@ def display_portfolio_builder():
         picks = portfolio['picks']
         reasoning = portfolio['reasoning']
         
-        # Summary cards
-        col1, col2, col3 = st.columns(3)
+        # Summary cards with transaction costs
+        col1, col2, col3, col4 = st.columns(4)
         
         with col1:
             st.markdown(f"""
@@ -1397,51 +1740,116 @@ def display_portfolio_builder():
             """, unsafe_allow_html=True)
         
         with col3:
+            # Show transaction costs if available
+            if 'total_transaction_cost' in meta:
+                cost_color = "#28a745" if meta['transaction_cost_percentage'] < 1.5 else "#ffc107" if meta['transaction_cost_percentage'] < 3.0 else "#dc3545"
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div>� Transaction Costs</div>
+                    <div class="metric-value" style="color: {cost_color};">₹{meta['total_transaction_cost']:,.2f}</div>
+                    <div style="color: {cost_color};">{meta['transaction_cost_percentage']:.2f}% of capital</div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div>🎯 Asset Types</div>
+                    <div style="font-size: 1.2rem; color: #888;">{len([a for a in alloc if alloc[a].get('percentage', 0) > 0])}</div>
+                </div>
+                """, unsafe_allow_html=True)
+        
+        with col4:
             st.markdown(f"""
             <div class="metric-card">
-                <div>📅 Generated</div>
+                <div>�📅 Generated</div>
                 <div style="font-size: 1rem; color: #888;">{meta['generated_at']}</div>
             </div>
             """, unsafe_allow_html=True)
+        
+        # Show intelligent asset selection info
+        if 'asset_types_included' in meta:
+            asset_types_str = ', '.join([a.replace('_', ' ').title() for a in meta['asset_types_included']])
+            st.info(f"🎯 **Intelligent Asset Selection:** Based on your capital of ₹{meta['capital']:,.0f}, we've selected {len(meta['asset_types_included'])} asset type(s) for optimal diversification: **{asset_types_str}**")
         
         st.markdown("---")
         
         # Allocation Breakdown
         st.subheader("💼 Allocation Breakdown")
         
-        # Create bar chart
-        alloc_df = pd.DataFrame([
-            {
-                'Asset Type': asset_type.upper().replace('_', ' '),
-                'Percentage': data['percentage'],
-                'Amount': data['amount']
-            }
-            for asset_type, data in alloc.items()
-        ])
+        # Create enhanced bar chart with net amounts
+        alloc_data = []
+        for asset_type, data in alloc.items():
+            if data.get('percentage', 0) > 0:
+                alloc_data.append({
+                    'Asset Type': asset_type.upper().replace('_', ' '),
+                    'Percentage': data['percentage'],
+                    'Gross Amount': data['amount'],
+                    'Transaction Cost': data.get('transaction_cost', 0),
+                    'Net Amount': data.get('net_amount', data['amount'])
+                })
         
-        fig = go.Figure(data=[
-            go.Bar(
-                x=alloc_df['Asset Type'],
-                y=alloc_df['Percentage'],
-                text=alloc_df['Percentage'].apply(lambda x: f"{x}%"),
-                textposition='outside',
-                marker_color=['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b']
+        alloc_df = pd.DataFrame(alloc_data)
+        
+        # Create side-by-side comparison charts
+        col_chart1, col_chart2 = st.columns(2)
+        
+        with col_chart1:
+            # Gross vs Net Amount Chart
+            fig = go.Figure(data=[
+                go.Bar(
+                    name='Net Amount',
+                    x=alloc_df['Asset Type'],
+                    y=alloc_df['Net Amount'],
+                    text=alloc_df['Net Amount'].apply(lambda x: f"₹{x:,.0f}"),
+                    textposition='inside',
+                    marker_color='#43e97b'
+                ),
+                go.Bar(
+                    name='Transaction Cost',
+                    x=alloc_df['Asset Type'],
+                    y=alloc_df['Transaction Cost'],
+                    text=alloc_df['Transaction Cost'].apply(lambda x: f"₹{x:.0f}" if x > 0 else ""),
+                    textposition='inside',
+                    marker_color='#f093fb'
+                )
+            ])
+            
+            fig.update_layout(
+                title="Investment Breakdown (Net vs Costs)",
+                xaxis_title="Asset Type",
+                yaxis_title="Amount (₹)",
+                height=400,
+                template="plotly_dark",
+                barmode='stack'
             )
-        ])
+            
+            st.plotly_chart(fig, use_container_width=True)
         
-        fig.update_layout(
-            title="Asset Allocation Strategy",
-            xaxis_title="Asset Type",
-            yaxis_title="Allocation (%)",
-            height=400,
-            template="plotly_dark"
-        )
+        with col_chart2:
+            # Percentage Allocation Pie Chart
+            fig = go.Figure(data=[go.Pie(
+                labels=alloc_df['Asset Type'],
+                values=alloc_df['Percentage'],
+                hole=0.4,
+                marker=dict(colors=['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b'])
+            )])
+            
+            fig.update_layout(
+                title="Allocation Distribution",
+                height=400,
+                template="plotly_dark"
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
         
-        st.plotly_chart(fig, use_container_width=True)
-        
-        # Allocation table
+        # Allocation table with enhanced details
         st.dataframe(
-            alloc_df.style.format({'Amount': '₹{:,.0f}', 'Percentage': '{:.0f}%'}),
+            alloc_df.style.format({
+                'Gross Amount': '₹{:,.0f}',
+                'Transaction Cost': '₹{:,.2f}',
+                'Net Amount': '₹{:,.0f}',
+                'Percentage': '{:.1f}%'
+            }),
             use_container_width=True
         )
         
@@ -1472,6 +1880,95 @@ def display_portfolio_builder():
                             st.markdown(f"- 💼 Fundamental: {pick['fundamental']:.0f}")
                             st.markdown(f"- 📰 Sentiment: {pick['sentiment']:.0f}")
                             st.markdown(f"- ⚠️ Risk: {pick['risk']:.0f}")
+                        
+                        # SHOW PROFESSIONAL ANALYSIS DATA IF AVAILABLE
+                        if 'professional_analysis' in pick:
+                            st.markdown("---")
+                            st.markdown("### 📊 Professional Analysis Report")
+                            analysis = pick['professional_analysis']
+                            
+                            # Data Quality
+                            if 'data_quality' in analysis:
+                                dq = analysis['data_quality']
+                                col_dq1, col_dq2, col_dq3 = st.columns(3)
+                                with col_dq1:
+                                    st.metric("📰 News Articles", f"{dq.get('news_count', 0)} articles")
+                                    if dq.get('news_date_range'):
+                                        st.caption(f"From: {dq['news_date_range']}")
+                                with col_dq2:
+                                    st.metric("📈 Price Data", f"{dq.get('price_points', 0)} points")
+                                    if dq.get('price_date_range'):
+                                        st.caption(f"From: {dq['price_date_range']}")
+                                with col_dq3:
+                                    st.metric("💼 Fundamentals", dq.get('fundamentals_quarter', 'N/A'))
+                            
+                            # News Sentiment Details
+                            if 'news_sentiment' in analysis:
+                                ns = analysis['news_sentiment']
+                                st.markdown("#### 📰 News Sentiment Analysis")
+                                col_ns1, col_ns2, col_ns3, col_ns4 = st.columns(4)
+                                with col_ns1:
+                                    st.metric("Sentiment Score", f"{ns.get('score', 0):.1f}/100")
+                                with col_ns2:
+                                    st.metric("✅ Positive", ns.get('positive_count', 0))
+                                with col_ns3:
+                                    st.metric("⚠️ Neutral", ns.get('neutral_count', 0))
+                                with col_ns4:
+                                    st.metric("❌ Negative", ns.get('negative_count', 0))
+                                
+                                # Show recent headlines
+                                if ns.get('recent_headlines'):
+                                    with st.expander("📰 Recent Headlines"):
+                                        for hl in ns['recent_headlines'][:5]:
+                                            st.markdown(f"- {hl}")
+                            
+                            # Technical Analysis Details
+                            if 'technical_analysis' in analysis:
+                                ta = analysis['technical_analysis']
+                                st.markdown("#### 📈 Technical Analysis")
+                                col_ta1, col_ta2, col_ta3, col_ta4 = st.columns(4)
+                                with col_ta1:
+                                    st.metric("SMA 20", f"₹{ta.get('sma_20', 0):,.2f}")
+                                with col_ta2:
+                                    st.metric("SMA 50", f"₹{ta.get('sma_50', 0):,.2f}")
+                                with col_ta3:
+                                    st.metric("RSI", f"{ta.get('rsi', 0):.1f}")
+                                with col_ta4:
+                                    st.metric("Volatility", f"{ta.get('volatility', 0):.1f}%")
+                                
+                                if ta.get('trend'):
+                                    trend_color = "🟢" if "UP" in ta['trend'] else "🔴" if "DOWN" in ta['trend'] else "🟡"
+                                    st.info(f"{trend_color} **Trend:** {ta['trend']}")
+                            
+                            # Fundamental Analysis Details
+                            if 'fundamental_analysis' in analysis:
+                                fa = analysis['fundamental_analysis']
+                                st.markdown("#### 💼 Fundamental Analysis")
+                                col_fa1, col_fa2, col_fa3, col_fa4 = st.columns(4)
+                                with col_fa1:
+                                    pe = fa.get('pe_ratio', 0)
+                                    st.metric("P/E Ratio", f"{pe:.2f}" if pe else "N/A")
+                                with col_fa2:
+                                    roe = fa.get('roe', 0)
+                                    st.metric("ROE", f"{roe:.2f}%" if roe else "N/A")
+                                with col_fa3:
+                                    de = fa.get('debt_to_equity', 0)
+                                    st.metric("D/E Ratio", f"{de:.2f}" if de else "N/A")
+                                with col_fa4:
+                                    cr = fa.get('current_ratio', 0)
+                                    st.metric("Current Ratio", f"{cr:.2f}" if cr else "N/A")
+                                
+                                # Score breakdown
+                                if fa.get('score_breakdown'):
+                                    with st.expander("🧮 Score Calculation Breakdown"):
+                                        sb = fa['score_breakdown']
+                                        st.markdown(f"""
+                                        - **P/E Score:** {sb.get('pe_score', 0):.1f}/30 pts
+                                        - **ROE Score:** {sb.get('roe_score', 0):.1f}/30 pts  
+                                        - **D/E Score:** {sb.get('de_score', 0):.1f}/20 pts
+                                        - **Current Ratio Score:** {sb.get('cr_score', 0):.1f}/20 pts
+                                        - **Total:** {fa.get('score', 0):.1f}/100 pts
+                                        """)
                         
                         # SHOW DETAILED REASONING (Multi-paragraph format)
                         if 'reasoning' in pick and pick['reasoning']:
@@ -1512,6 +2009,33 @@ def display_portfolio_builder():
                             st.markdown(f"- 📰 Sentiment: {pick['sentiment']:.0f}")
                             st.markdown(f"- ⚠️ Risk: {pick['risk']:.0f}")
                         
+                        # SHOW PROFESSIONAL ANALYSIS DATA IF AVAILABLE
+                        if 'professional_analysis' in pick:
+                            st.markdown("---")
+                            st.markdown("### 📊 Professional Analysis Report")
+                            analysis = pick['professional_analysis']
+                            
+                            # Data Quality
+                            if 'data_quality' in analysis:
+                                dq = analysis['data_quality']
+                                col_dq1, col_dq2 = st.columns(2)
+                                with col_dq1:
+                                    st.metric("📰 News Articles", f"{dq.get('news_count', 0)} articles")
+                                with col_dq2:
+                                    st.metric("📈 Price Data", f"{dq.get('price_points', 0)} points")
+                            
+                            # Technical Analysis
+                            if 'technical_analysis' in analysis:
+                                ta = analysis['technical_analysis']
+                                st.markdown("#### 📈 Technical Indicators")
+                                col_ta1, col_ta2, col_ta3 = st.columns(3)
+                                with col_ta1:
+                                    st.metric("SMA 20", f"₹{ta.get('sma_20', 0):,.2f}")
+                                with col_ta2:
+                                    st.metric("RSI", f"{ta.get('rsi', 0):.1f}")
+                                with col_ta3:
+                                    st.metric("Volatility", f"{ta.get('volatility', 0):.1f}%")
+                        
                         # SHOW DETAILED REASONING (Multi-paragraph format)
                         if 'reasoning' in pick and pick['reasoning']:
                             st.markdown("---")
@@ -1538,6 +2062,21 @@ def display_portfolio_builder():
                             st.markdown(f"- 💼 Fundamental: {pick['fundamental']:.0f}")
                             st.markdown(f"- 📰 Sentiment: {pick['sentiment']:.0f}")
                             st.markdown(f"- ⚠️ Risk: {pick['risk']:.0f}")
+                        
+                        # SHOW PROFESSIONAL ANALYSIS DATA IF AVAILABLE
+                        if 'professional_analysis' in pick:
+                            st.markdown("---")
+                            st.markdown("### 📊 Professional Analysis Report")
+                            analysis = pick['professional_analysis']
+                            
+                            # Data Quality
+                            if 'data_quality' in analysis:
+                                dq = analysis['data_quality']
+                                col_dq1, col_dq2 = st.columns(2)
+                                with col_dq1:
+                                    st.metric("📰 News Articles", f"{dq.get('news_count', 0)} articles")
+                                with col_dq2:
+                                    st.metric("📈 NAV History", f"{dq.get('price_points', 0)} points")
                         
                         # SHOW DETAILED REASONING (Multi-paragraph format)
                         if 'reasoning' in pick and pick['reasoning']:
@@ -1626,44 +2165,50 @@ ALLOCATION:
         # Welcome screen for portfolio builder
         st.markdown("""
         <div style="text-align: center; padding: 3rem;">
-            <h2 style="color: #667eea;">👈 Configure & Generate</h2>
-            <p style="font-size: 1.2rem; color: #888;">Enter your investment details and click <strong>Generate Portfolio</strong></p>
+            <h2 style="background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2rem; font-weight: 700;">Configure Your Investment Strategy</h2>
+            <p style="font-size: 1.1rem; color: #94a3b8; margin: 1rem 0;">Enter your investment preferences in the sidebar to generate a personalized portfolio</p>
             <br>
-            <div style="text-align: left; max-width: 700px; margin: 0 auto; padding: 2rem; background: rgba(255,255,255,0.05); border-radius: 10px;">
-                <h3 style="color: #667eea;">💼 What is FinRobot Portfolio Builder?</h3>
-                <p>Unlike traditional systems that just show "Top 20 stocks", this builds a <strong>COMPLETE investment strategy</strong>:</p>
-                <ul style="line-height: 2;">
-                    <li><strong>Multi-Asset Allocation:</strong> Automatically distributes capital across Stocks, ETFs, Mutual Funds, FDs, and Crypto</li>
-                    <li><strong>Risk-Based Strategy:</strong> Allocation changes based on your risk appetite (Conservative/Moderate/Aggressive)</li>
-                    <li><strong>Specific Recommendations:</strong> Top picks in each category with exact investment amounts</li>
-                    <li><strong>AI Reasoning:</strong> FinGPT-powered explanation of WHY this allocation suits your profile</li>
+            <div style="text-align: left; max-width: 800px; margin: 0 auto; padding: 2.5rem; background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 100%); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; backdrop-filter: blur(10px);">
+                <h3 style="background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.5rem; margin-bottom: 1.5rem;">Professional Portfolio Builder</h3>
+                <p style="line-height: 1.8; color: #cbd5e1; margin-bottom: 2rem;">Our AI-powered system analyzes thousands of assets to build comprehensive investment strategies tailored to your risk profile and financial goals.</p>
+                
+                <h4 style="color: #3b82f6; font-size: 1.1rem; margin: 1.5rem 0 1rem 0;">Key Features</h4>
+                <ul style="line-height: 2; color: #cbd5e1; list-style: none; padding-left: 0;">
+                    <li style="padding: 0.5rem 0; border-left: 3px solid #3b82f6; padding-left: 1rem; margin: 0.5rem 0;"><strong style="color: #3b82f6;">Multi-Asset Allocation</strong><br/>
+                    Automatically distributes capital across Stocks, ETFs, Mutual Funds, Fixed Deposits, and Cryptocurrencies</li>
+                    <li style="padding: 0.5rem 0; border-left: 3px solid #06b6d4; padding-left: 1rem; margin: 0.5rem 0;"><strong style="color: #06b6d4;">Risk-Based Strategy</strong><br/>
+                    Allocation dynamically adjusts based on your risk tolerance and investment horizon</li>
+                    <li style="padding: 0.5rem 0; border-left: 3px solid #3b82f6; padding-left: 1rem; margin: 0.5rem 0;"><strong style="color: #3b82f6;">Specific Recommendations</strong><br/>
+                    Top picks in each asset category with exact investment amounts and reasoning</li>
+                    <li style="padding: 0.5rem 0; border-left: 3px solid #06b6d4; padding-left: 1rem; margin: 0.5rem 0;"><strong style="color: #06b6d4;">AI-Powered Analysis</strong><br/>
+                    Advanced algorithms analyze fundamentals, technicals, and market sentiment</li>
                 </ul>
                 <br>
-                <h3 style="color: #667eea;">📊 Allocation Strategies</h3>
-                <table style="width: 100%; margin-top: 1rem;">
-                    <tr style="background: rgba(255,255,255,0.05);">
-                        <th style="padding: 0.5rem; text-align: left;">Risk Profile</th>
-                        <th style="padding: 0.5rem;">Equity</th>
-                        <th style="padding: 0.5rem;">Debt</th>
-                        <th style="padding: 0.5rem;">Returns</th>
+                <h4 style="color: #3b82f6; font-size: 1.1rem; margin: 1.5rem 0 1rem 0;">Risk-Based Allocation Models</h4>
+                <table style="width: 100%; margin-top: 1rem; border-collapse: collapse;">
+                    <tr style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2);">
+                        <th style="padding: 1rem; text-align: left; color: #3b82f6; font-weight: 600;">Risk Profile</th>
+                        <th style="padding: 1rem; text-align: center; color: #3b82f6; font-weight: 600;">Equity</th>
+                        <th style="padding: 1rem; text-align: center; color: #3b82f6; font-weight: 600;">Debt</th>
+                        <th style="padding: 1rem; text-align: center; color: #3b82f6; font-weight: 600;">Expected Returns</th>
                     </tr>
-                    <tr>
-                        <td style="padding: 0.5rem;">Conservative (0-30%)</td>
-                        <td style="padding: 0.5rem; text-align: center;">35%</td>
-                        <td style="padding: 0.5rem; text-align: center;">60%</td>
-                        <td style="padding: 0.5rem; text-align: center;">6-9%</td>
+                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                        <td style="padding: 0.8rem; color: #cbd5e1;">Conservative (0-30%)</td>
+                        <td style="padding: 0.8rem; text-align: center; color: #94a3b8;">35%</td>
+                        <td style="padding: 0.8rem; text-align: center; color: #94a3b8;">60%</td>
+                        <td style="padding: 0.8rem; text-align: center; color: #22c55e;">6-9% p.a.</td>
                     </tr>
-                    <tr style="background: rgba(255,255,255,0.05);">
-                        <td style="padding: 0.5rem;">Moderate (31-60%)</td>
-                        <td style="padding: 0.5rem; text-align: center;">55%</td>
-                        <td style="padding: 0.5rem; text-align: center;">40%</td>
-                        <td style="padding: 0.5rem; text-align: center;">9-13%</td>
+                    <tr style="background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                        <td style="padding: 0.8rem; color: #cbd5e1;">Moderate (31-60%)</td>
+                        <td style="padding: 0.8rem; text-align: center; color: #94a3b8;">55%</td>
+                        <td style="padding: 0.8rem; text-align: center; color: #94a3b8;">40%</td>
+                        <td style="padding: 0.8rem; text-align: center; color: #22c55e;">9-13% p.a.</td>
                     </tr>
-                    <tr>
-                        <td style="padding: 0.5rem;">Aggressive (61-100%)</td>
-                        <td style="padding: 0.5rem; text-align: center;">75%</td>
-                        <td style="padding: 0.5rem; text-align: center;">20%</td>
-                        <td style="padding: 0.5rem; text-align: center;">13-18%</td>
+                    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                        <td style="padding: 0.8rem; color: #cbd5e1;">Aggressive (61-100%)</td>
+                        <td style="padding: 0.8rem; text-align: center; color: #94a3b8;">75%</td>
+                        <td style="padding: 0.8rem; text-align: center; color: #94a3b8;">20%</td>
+                        <td style="padding: 0.8rem; text-align: center; color: #22c55e;">13-18% p.a.</td>
                     </tr>
                 </table>
             </div>
@@ -1680,27 +2225,27 @@ def main():
         is_connected, message = check_database_connection()
         st.session_state.db_connected = is_connected
         if not is_connected:
-            st.error(f"❌ {message}")
-            st.info("💡 Make sure your database is running and configured correctly.")
+            st.error(f"Database Connection Failed: {message}")
+            st.info("Please ensure your database is running and configured correctly.")
             return
     
     st.markdown("""
     <div class="main-header">
-        <h1>💼 Lumia Expert Investment Advisor</h1>
-        <p>AI-Powered Analysis of ALL 2,200+ Assets | Stocks, ETFs, Mutual Funds & More</p>
+        <h1>Lumia Investment Advisory</h1>
+        <p>Professional Portfolio Management & Asset Analysis | 2,200+ Assets Analyzed</p>
     </div>
     """, unsafe_allow_html=True)
     
     # TOP LEVEL PAGE SELECTOR
     page = st.sidebar.radio(
-        "📱 Select Module",
-        ["🎯 Asset Screener", "💼 Portfolio Builder"],
+        "Navigation",
+        ["Asset Screener", "Portfolio Builder"],
         index=0,
         key="page_selector",
         help="Choose between individual asset analysis or complete portfolio allocation"
     )
     
-    if page == "💼 Portfolio Builder":
+    if page == "Portfolio Builder":
         display_portfolio_builder()
     else:
         display_asset_screener()

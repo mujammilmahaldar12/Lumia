@@ -254,17 +254,30 @@ class DailyPriceCollector:
     # FUNCTION 2: DOWNLOAD MUTUAL FUND PRICES
     # ========================================
     
-    def download_mutual_fund_prices(self, mutual_funds: List[Asset]) -> List[Dict]:
+    def download_mutual_fund_prices(self, mutual_funds: List[Asset], from_date: str = None, to_date: str = None) -> List[Dict]:
         """
         Download historical mutual fund price data.
         
         Args:
             mutual_funds: List of mutual fund Asset objects
+            from_date: Start date for price collection (YYYY-MM-DD format)
+            to_date: End date for price collection (YYYY-MM-DD format)
             
         Returns:
             List of price data dictionaries
         """
         self.logger.info(f"[MUTUAL FUNDS] Downloading price data for {len(mutual_funds)} mutual funds...")
+        
+        # Determine date range
+        if from_date and to_date:
+            start_date = datetime.strptime(from_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(to_date, '%Y-%m-%d').date()
+            self.logger.info(f"[DATE] Using specified date range: {start_date} to {end_date}")
+        else:
+            # Use default range - 25 years of history
+            start_date = date.today() - timedelta(days=25*365)  # 25 years
+            end_date = date.today()
+            self.logger.info(f"[DATE] Using default date range: {start_date} to {end_date} (25 years)")
         
         all_price_data = []
         successful_downloads = 0
@@ -273,44 +286,32 @@ class DailyPriceCollector:
             try:
                 self.logger.info(f"  Fetching prices for {fund.symbol}...")
                 
-                # For Indian mutual funds, we might need to use different approach
-                # For now, try yfinance (works for US mutual funds)
-                if fund.country == 'US':
-                    # US mutual funds can use yfinance
-                    ticker = yf.Ticker(fund.symbol)
-                    
-                    start_date = max(
-                        fund.created_at.date() if fund.created_at else date.today() - timedelta(days=365),
-                        date.today() - timedelta(days=365)
-                    )
-                    
-                    hist = ticker.history(start=start_date, end=date.today())
-                    
-                    if not hist.empty:
-                        for date_idx, row in hist.iterrows():
-                            price_data = {
-                                'asset_id': fund.id,
-                                'date': date_idx.date(),
-                                'open_price': float(row['Open']),
-                                'high_price': float(row['High']),
-                                'low_price': float(row['Low']),
-                                'close_price': float(row['Close']),
-                                'adj_close': float(row.get('Adj Close', row['Close'])),
-                                'volume': int(row.get('Volume', 0)),
-                                'dividends': float(row.get('Dividends', 0)),
-                                'stock_splits': float(row.get('Stock Splits', 0))
-                            }
-                            all_price_data.append(price_data)
-                        
-                        successful_downloads += 1
-                        self.logger.info(f"    [SUCCESS] Got {len(hist)} price records for {fund.symbol}")
-                    else:
-                        self.logger.warning(f"    [WARNING] No price data for {fund.symbol}")
+                # Try yfinance for mutual funds (works for US and some international)
+                ticker = yf.Ticker(fund.symbol)
                 
+                # Use the determined date range
+                hist = ticker.history(start=start_date, end=end_date)
+                
+                if not hist.empty:
+                    for date_idx, row in hist.iterrows():
+                        price_data = {
+                            'asset_id': fund.id,
+                            'date': date_idx.date(),
+                            'open_price': float(row['Open']),
+                            'high_price': float(row['High']),
+                            'low_price': float(row['Low']),
+                            'close_price': float(row['Close']),
+                            'adj_close': float(row.get('Adj Close', row['Close'])),
+                            'volume': int(row.get('Volume', 0)),
+                            'dividends': float(row.get('Dividends', 0)),
+                            'stock_splits': float(row.get('Stock Splits', 0))
+                        }
+                        all_price_data.append(price_data)
+                    
+                    successful_downloads += 1
+                    self.logger.info(f"    [SUCCESS] Got {len(hist)} price records for {fund.symbol}")
                 else:
-                    # Indian mutual funds - would need AMFI NAV data
-                    # For now, we'll skip but this can be implemented with AMFI API
-                    self.logger.info(f"    [INFO] Indian MF price collection not implemented yet: {fund.symbol}")
+                    self.logger.warning(f"    [WARNING] No price data for {fund.symbol}")
                 
                 time.sleep(0.1)
                 
@@ -325,17 +326,30 @@ class DailyPriceCollector:
     # FUNCTION 3: DOWNLOAD ETF PRICES
     # ========================================
     
-    def download_etf_prices(self, etfs: List[Asset]) -> List[Dict]:
+    def download_etf_prices(self, etfs: List[Asset], from_date: str = None, to_date: str = None) -> List[Dict]:
         """
         Download historical ETF price data.
         
         Args:
             etfs: List of ETF Asset objects
+            from_date: Start date for price collection (YYYY-MM-DD format)
+            to_date: End date for price collection (YYYY-MM-DD format)
             
         Returns:
             List of price data dictionaries
         """
         self.logger.info(f"[ETFS] Downloading price data for {len(etfs)} ETFs...")
+        
+        # Determine date range
+        if from_date and to_date:
+            start_date = datetime.strptime(from_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(to_date, '%Y-%m-%d').date()
+            self.logger.info(f"[DATE] Using specified date range: {start_date} to {end_date}")
+        else:
+            # Use default range - 25 years of history
+            start_date = date.today() - timedelta(days=25*365)  # 25 years
+            end_date = date.today()
+            self.logger.info(f"[DATE] Using default date range: {start_date} to {end_date} (25 years)")
         
         all_price_data = []
         successful_downloads = 0
@@ -347,12 +361,8 @@ class DailyPriceCollector:
                 # ETFs work well with yfinance
                 ticker = yf.Ticker(etf.symbol)
                 
-                start_date = max(
-                    etf.created_at.date() if etf.created_at else date.today() - timedelta(days=365),
-                    date.today() - timedelta(days=365)
-                )
-                
-                hist = ticker.history(start=start_date, end=date.today())
+                # Use the determined date range
+                hist = ticker.history(start=start_date, end=end_date)
                 
                 if not hist.empty:
                     for date_idx, row in hist.iterrows():
@@ -721,6 +731,7 @@ class DailyPriceCollector:
         
         db = self.get_db_session()
         added_count = 0
+        skipped_count = 0
         batch_size = 1000  # Process in batches for better performance
         
         try:
@@ -728,27 +739,45 @@ class DailyPriceCollector:
                 batch = prices_to_add[i:i + batch_size]
                 
                 for price_data in batch:
-                    new_price = DailyPrice(
-                        asset_id=price_data['asset_id'],
-                        date=price_data['date'],
-                        open_price=price_data['open_price'],
-                        high_price=price_data['high_price'],
-                        low_price=price_data['low_price'],
-                        close_price=price_data['close_price'],
-                        adj_close=price_data['adj_close'],
-                        volume=price_data['volume'],
-                        dividends=price_data['dividends'],
-                        stock_splits=price_data['stock_splits']
-                    )
-                    
-                    db.add(new_price)
-                    added_count += 1
+                    try:
+                        new_price = DailyPrice(
+                            asset_id=price_data['asset_id'],
+                            date=price_data['date'],
+                            open_price=price_data['open_price'],
+                            high_price=price_data['high_price'],
+                            low_price=price_data['low_price'],
+                            close_price=price_data['close_price'],
+                            adj_close=price_data['adj_close'],
+                            volume=price_data['volume'],
+                            dividends=price_data['dividends'],
+                            stock_splits=price_data['stock_splits']
+                        )
+                        
+                        db.add(new_price)
+                        added_count += 1
+                    except Exception as e:
+                        # Skip duplicate entries silently
+                        if 'duplicate key' in str(e).lower() or 'unique constraint' in str(e).lower():
+                            skipped_count += 1
+                            db.rollback()
+                            continue
+                        else:
+                            raise
                 
                 # Commit each batch
-                db.commit()
-                self.logger.info(f"  [BATCH] Added batch {i//batch_size + 1}: {len(batch)} records")
+                try:
+                    db.commit()
+                    self.logger.info(f"  [BATCH] Added batch {i//batch_size + 1}: {len(batch)} records")
+                except Exception as e:
+                    if 'duplicate key' in str(e).lower() or 'unique constraint' in str(e).lower():
+                        self.logger.warning(f"  [BATCH] Skipped {skipped_count} duplicate records in batch {i//batch_size + 1}")
+                        db.rollback()
+                    else:
+                        raise
             
             self.logger.info(f"[SUCCESS] Successfully added {added_count} new price records")
+            if skipped_count > 0:
+                self.logger.info(f"[INFO] Skipped {skipped_count} duplicate records")
             
         except Exception as e:
             self.logger.error(f"❌ Error adding price records: {str(e)}")
@@ -814,11 +843,18 @@ class DailyPriceCollector:
             
             if etfs:
                 self.logger.info("📊 Processing ETFs with date range...")
-                etf_result = self.download_etf_prices(etfs)  # ETF method doesn't have date params yet
+                etf_result = self.download_etf_prices(etfs, from_date, to_date)
                 
                 if etf_result:
                     prices_to_add, _ = self.cross_check_prices(etf_result)
                     self.add_new_prices(prices_to_add)
+                    
+                    all_results['by_type']['etf'] = {
+                        'total': len(etfs),
+                        'success': len(etf_result) > 0,
+                        'records_added': len(prices_to_add) if 'prices_to_add' in locals() else 0
+                    }
+                    all_results['total_added'] += len(prices_to_add) if 'prices_to_add' in locals() else 0
             
             self.logger.info(f"🎉 Intelligent price sync completed!")
             self.logger.info(f"📊 Total: {all_results['total_processed']} processed, {all_results['total_added']} added")
@@ -843,7 +879,12 @@ class DailyPriceCollector:
             
             # Get all assets from database
             stocks = db.query(Asset).filter(Asset.type == 'stock', Asset.is_active == True).all()
-            mutual_funds = db.query(Asset).filter(Asset.type == 'mutual_fund', Asset.is_active == True).all()
+            # Exclude Indian mutual funds (they use AMFI API, not yfinance)
+            mutual_funds = db.query(Asset).filter(
+                Asset.type == 'mutual_fund',
+                Asset.is_active == True,
+                ~Asset.symbol.like('IN-MF-%')  # Exclude Indian MFs
+            ).all()
             etfs = db.query(Asset).filter(Asset.type == 'etf', Asset.is_active == True).all()
             cryptos = db.query(Asset).filter(Asset.type == 'crypto', Asset.is_active == True).all()
             
@@ -855,22 +896,30 @@ class DailyPriceCollector:
             
             all_price_data = []
             
+            # Define default 25-year range
+            from_date = (date.today() - timedelta(days=25*365)).strftime('%Y-%m-%d')
+            to_date = date.today().strftime('%Y-%m-%d')
+            
             # Download prices for each asset type
             if stocks:
-                stock_prices = self.download_stock_prices(stocks)
-                all_price_data.extend(stock_prices)
+                self.logger.info("📈 Downloading stock prices (25 years)...")
+                stock_result = self.download_stock_prices(stocks, from_date, to_date)
+                all_price_data.extend(stock_result['price_data'])
             
             if mutual_funds:
-                mf_prices = self.download_mutual_fund_prices(mutual_funds)
+                self.logger.info("💼 Downloading mutual fund prices (25 years)...")
+                mf_prices = self.download_mutual_fund_prices(mutual_funds, from_date, to_date)
                 all_price_data.extend(mf_prices)
             
             if etfs:
-                etf_prices = self.download_etf_prices(etfs)
+                self.logger.info("📊 Downloading ETF prices (25 years)...")
+                etf_prices = self.download_etf_prices(etfs, from_date, to_date)
                 all_price_data.extend(etf_prices)
             
             if cryptos:
-                crypto_prices = self.download_crypto_prices(cryptos)
-                all_price_data.extend(crypto_prices)
+                self.logger.info("🪙 Downloading crypto prices (90 days - API limit)...")
+                crypto_result = self.download_crypto_prices(cryptos, from_date, to_date)
+                all_price_data.extend(crypto_result['price_data'])
             
             self.logger.info(f"📊 Total price records downloaded: {len(all_price_data)}")
             
@@ -926,24 +975,32 @@ class DailyPriceCollector:
             
             self.logger.info(f"📊 Found {len(assets_needing_update)} assets needing recent price updates")
             
-            # Group by type and process
+            # Group by type and process (exclude Indian MFs - they use AMFI)
             stocks = [a for a in assets_needing_update if a.type == 'stock']
-            mutual_funds = [a for a in assets_needing_update if a.type == 'mutual_fund']
+            mutual_funds = [a for a in assets_needing_update if a.type == 'mutual_fund' and not a.symbol.startswith('IN-MF-')]
             etfs = [a for a in assets_needing_update if a.type == 'etf']
             cryptos = [a for a in assets_needing_update if a.type == 'crypto']
+            
+            # Date range for recent sync
+            from_date = (date.today() - timedelta(days=days)).strftime('%Y-%m-%d')
+            to_date = date.today().strftime('%Y-%m-%d')
             
             all_price_data = []
             
             if stocks:
-                result = self.download_stock_prices(stocks)
+                result = self.download_stock_prices(stocks, from_date, to_date)
                 all_price_data.extend(result['price_data'])
             
+            if mutual_funds:
+                mf_prices = self.download_mutual_fund_prices(mutual_funds, from_date, to_date)
+                all_price_data.extend(mf_prices)
+            
             if etfs:
-                etf_prices = self.download_etf_prices(etfs)  # Returns list directly
+                etf_prices = self.download_etf_prices(etfs, from_date, to_date)
                 all_price_data.extend(etf_prices)
             
             if cryptos:
-                result = self.download_crypto_prices(cryptos)
+                result = self.download_crypto_prices(cryptos, from_date, to_date)
                 all_price_data.extend(result['price_data'])
             
             # Add only new prices (no need to check for updates in recent sync)

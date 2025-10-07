@@ -95,6 +95,7 @@ class ExecutionEngine:
         from collectors.mutual_fund_manager import sync_mutual_funds
         from collectors.crypto_manager import sync_cryptos
         from collectors.fundamentals_collector import update_stale_fundamentals
+        from collectors.collect_news import collect_stock_news, collect_crypto_news
         
         collector_functions = {
             'stocks': sync_stocks,
@@ -102,6 +103,8 @@ class ExecutionEngine:
             'mutual_funds': sync_mutual_funds,
             'cryptocurrencies': sync_cryptos,
             'fundamentals': lambda: update_stale_fundamentals(days_old=90),  # Only update stale data
+            'stock_news': lambda: collect_stock_news(limit=None, articles_per_stock=5),  # ALL stocks
+            'crypto_news': lambda: collect_crypto_news(limit=None, articles_per_crypto=5),  # ALL cryptos
         }
         
         if collector_name not in collector_functions:
@@ -118,19 +121,29 @@ class ExecutionEngine:
             
             # Update stats if result is a dict with statistics
             if isinstance(result, dict):
-                run_record.update_stats(
-                    processed=result.get('total', 1),
-                    added=result.get('success', 0),
-                    failed=result.get('failed', 0)
-                )
+                # News collectors return different keys
+                if 'total_articles_saved' in result:
+                    # News collector result
+                    run_record.update_stats(
+                        processed=result.get('total_articles_fetched', 0),
+                        added=result.get('total_articles_saved', 0),
+                        failed=result.get('total_errors', 0)
+                    )
+                else:
+                    # Standard collector result
+                    run_record.update_stats(
+                        processed=result.get('total', 1),
+                        added=result.get('success', 0),
+                        failed=result.get('failed', 0)
+                    )
             else:
                 # Basic tracking for collectors without detailed stats
                 run_record.update_stats(
                     processed=1,  # Mark as processed
-                added=0,      # Unknown for function-based
-                updated=0,    # Unknown for function-based
-                failed=0      # No failure if we reach here
-            )
+                    added=0,      # Unknown for function-based
+                    updated=0,    # Unknown for function-based
+                    failed=0      # No failure if we reach here
+                )
             
             run_record.mark_completed()
             self.session.commit()
@@ -145,42 +158,82 @@ class ExecutionEngine:
             return False
     
     def _execute_price_collector(self, run_record, intelligence_report) -> bool:
-        """Execute price collector with smart date ranges"""
+        """Execute price collector with smart date ranges - includes Indian MFs"""
         
         from collectors.daily_price_collector import DailyPriceCollector
+        from collectors.indian_mf_collector import IndianMutualFundCollector
+        from models.assets import Asset
         
         try:
             run_record.mark_started()
             self.session.commit()
             
+            total_added = 0
+            total_processed = 0
+            
+            # 1. Standard price collection (stocks, ETFs, US MFs, crypto)
             collector = DailyPriceCollector()
             
             if intelligence_report.optimal_date_range:
                 from_date = intelligence_report.optimal_date_range['from_date']
                 to_date = intelligence_report.optimal_date_range['to_date']
-                logger.info(f"[📅 SMART] Price collection: {from_date} to {to_date}")
+                logger.info(f"[📅 PRICES] Collecting: {from_date} to {to_date}")
                 
                 result = collector.sync_prices_with_date_range(from_date, to_date)
+                total_added += result.get('total_added', 0)
+                total_processed += result.get('total_processed', 0)
             else:
-                result = {'total_processed': 0, 'total_added': 0, 'total_failed': 0}
+                logger.info(f"[📅 PRICES] Recent prices only (7 days)")
                 collector.sync_recent_prices_only(days=7)
             
+            # 2. Indian Mutual Fund NAV collection (separate from standard prices)
+            logger.info(f"[🇮🇳 INDIAN MFs] Collecting NAV data...")
+            indian_mf_collector = IndianMutualFundCollector()
+            
+            # Get Indian mutual funds from database
+            indian_funds = self.session.query(Asset).filter(
+                Asset.type == 'mutual_fund',
+                Asset.symbol.like('IN-MF-%')
+            ).all()
+            
+            if indian_funds:
+                logger.info(f"[🇮🇳 COUNT] {len(indian_funds):,} Indian mutual funds found")
+                
+                # Collect latest NAV (fast - uses AMFI bulk API)
+                nav_data = indian_mf_collector.download_indian_mf_prices(
+                    indian_funds,
+                    use_latest_only=True  # Fast mode: latest NAV only
+                )
+                
+                # Save to database
+                if nav_data:
+                    prices_to_add, _ = collector.cross_check_prices(nav_data)
+                    collector.add_new_prices(prices_to_add)
+                    
+                    total_added += len(prices_to_add)
+                    total_processed += len(nav_data)
+                    
+                    logger.info(f"[✅ INDIAN MFs] Added {len(prices_to_add):,} NAV records")
+            else:
+                logger.info(f"[ℹ️  INDIAN MFs] No Indian mutual funds in database")
+            
+            # Update stats
             run_record.update_stats(
-                processed=result.get('total_processed', 0),
-                added=result.get('total_added', 0),
-                failed=result.get('total_failed', 0)
+                processed=total_processed,
+                added=total_added,
+                failed=0
             )
             
             run_record.mark_completed()
             self.session.commit()
             
-            logger.info(f"[✅ SUCCESS] daily_prices: {run_record.records_added} new prices")
+            logger.info(f"[✅ SUCCESS] Prices: {total_added:,} new records ({total_processed:,} processed)")
             return True
             
         except Exception as e:
             run_record.mark_failed(str(e))
             self.session.commit()
-            logger.error(f"[❌ FAILED] daily_prices: {str(e)}")
+            logger.error(f"[❌ FAILED] Price collection: {str(e)}")
             return False
     
     def _create_run_record(self, collector_name: str, intelligence_report):

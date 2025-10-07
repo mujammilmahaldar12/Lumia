@@ -143,6 +143,7 @@ EXAMPLES:
     python lumia_collector.py                  # Smart auto mode (recommended)
     python lumia_collector.py --first-time    # Force complete setup (25 years)
     python lumia_collector.py --daily-only    # Only update daily prices
+    python lumia_collector.py --news-only     # Only collect news (stocks + crypto)
     python lumia_collector.py --analysis      # Show analysis without collecting
     python lumia_collector.py --status        # Show database status
     python lumia_collector.py --quiet         # Minimal output
@@ -153,6 +154,8 @@ EXAMPLES:
                        help='Force first-time setup (collect 25 years of data)')
     parser.add_argument('--daily-only', action='store_true', 
                        help='Only collect daily price updates')
+    parser.add_argument('--news-only', action='store_true',
+                       help='Only collect news articles (stocks + crypto)')
     parser.add_argument('--analysis', action='store_true',
                        help='Show intelligence analysis without collecting')
     parser.add_argument('--status', action='store_true',
@@ -194,6 +197,29 @@ EXAMPLES:
         elif args.daily_only:
             force_mode = CollectionMode.PRICE_ONLY
             logger.info("[OVERRIDE] Forcing daily-only mode")
+        elif args.news_only:
+            # Custom handling for news-only mode
+            from collectors.collect_news import collect_stock_news, collect_crypto_news
+            
+            logger.info("[NEWS] Collecting news for ALL stocks and cryptocurrencies...")
+            print("\n📰 NEWS COLLECTION MODE")
+            print("="*80)
+            
+            # Collect stock news
+            print("\n🔍 Collecting stock news (ALL stocks)...")
+            stock_results = collect_stock_news(limit=None, articles_per_stock=5)
+            print(f"✅ Stock News: {stock_results['total_articles_saved']} new articles")
+            
+            # Collect crypto news
+            print("\n🔍 Collecting crypto news (ALL cryptocurrencies)...")
+            crypto_results = collect_crypto_news(limit=None, articles_per_crypto=5)
+            print(f"✅ Crypto News: {crypto_results['total_articles_saved']} new articles")
+            
+            print("\n" + "="*80)
+            print(f"🎉 TOTAL: {stock_results['total_articles_saved'] + crypto_results['total_articles_saved']} new articles collected!")
+            print("="*80 + "\n")
+            
+            return
         
         # Execute collection
         success = execute_collection(intelligence_engine, execution_engine, session, force_mode)

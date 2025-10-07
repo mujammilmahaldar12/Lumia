@@ -112,7 +112,7 @@ class IntelligenceEngine:
         total_runs = session.query(CollectorRun).count()
         
         if total_runs > 0:
-            collector_types = ['stocks', 'etfs', 'mutual_funds', 'cryptocurrencies', 'fundamentals', 'daily_prices']
+            collector_types = ['stocks', 'etfs', 'mutual_funds', 'cryptocurrencies', 'fundamentals', 'daily_prices', 'stock_news', 'crypto_news']
             
             for collector_type in collector_types:
                 last_run = session.query(CollectorRun).filter(
@@ -181,7 +181,7 @@ class IntelligenceEngine:
         if report.database_state == DatabaseState.EMPTY:
             # First time - 25 years of data
             report.collection_mode = CollectionMode.FIRST_TIME_SETUP
-            report.collectors_to_run = ['stocks', 'etfs', 'mutual_funds', 'cryptocurrencies', 'daily_prices']
+            report.collectors_to_run = ['stocks', 'etfs', 'mutual_funds', 'cryptocurrencies', 'daily_prices', 'stock_news', 'crypto_news']
             report.estimated_time_minutes = 240
             report.expected_new_assets = 15000
             report.expected_new_prices = 500000
@@ -193,7 +193,7 @@ class IntelligenceEngine:
             
         elif report.database_state == DatabaseState.MINIMAL:
             report.collection_mode = CollectionMode.FULL_REFRESH
-            report.collectors_to_run = ['stocks', 'etfs', 'mutual_funds', 'cryptocurrencies', 'daily_prices']
+            report.collectors_to_run = ['stocks', 'etfs', 'mutual_funds', 'cryptocurrencies', 'daily_prices', 'stock_news', 'crypto_news']
             report.estimated_time_minutes = 180
             
         elif report.database_state == DatabaseState.INCOMPLETE:
@@ -260,6 +260,15 @@ class IntelligenceEngine:
             last_fundamentals_run = report.last_successful_runs.get('fundamentals')
             if not last_fundamentals_run or (datetime.utcnow() - last_fundamentals_run).days >= 7:
                 collectors_needed.append('fundamentals')
+            
+            # Check news - update daily (1 day)
+            last_stock_news_run = report.last_successful_runs.get('stock_news')
+            if not last_stock_news_run or (datetime.utcnow() - last_stock_news_run).days >= 1:
+                collectors_needed.append('stock_news')
+            
+            last_crypto_news_run = report.last_successful_runs.get('crypto_news')
+            if not last_crypto_news_run or (datetime.utcnow() - last_crypto_news_run).days >= 1:
+                collectors_needed.append('crypto_news')
             
             last_price_run = report.last_successful_runs.get('daily_prices')
             if not last_price_run or (datetime.utcnow() - last_price_run).days >= 1:

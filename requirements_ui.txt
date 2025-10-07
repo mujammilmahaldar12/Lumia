@@ -1,0 +1,26 @@
+# requirements_ui.txt
+# UI Requirements for Lumia Robo-Advisor
+
+# Core Streamlit
+streamlit>=1.28.0
+streamlit-chat>=0.1.1
+
+# Visualization
+plotly>=5.17.0
+matplotlib>=3.8.0
+seaborn>=0.12.0
+
+# Data Processing
+pandas>=2.1.0
+numpy>=1.24.0
+
+# AI/ML for Chat
+transformers>=4.35.0
+torch>=2.1.0
+sentencepiece>=0.1.99
+
+# FinBERT specifically
+# Will use: ProsusAI/finbert or yiyanghkust/finbert-tone
+
+# Additional
+Pillow>=10.0.0
