@@ -1,0 +1,147 @@
+CHAPTER 4
+SYSTEM DESIGN
+
+---
+
+4.1 Basic Modules
+
+The Lumia system is designed with a modular architecture, separating concerns into distinct packages and modules. This promotes maintainability, scalability, and clarity. The high-level modules are:
+
+1. Data Collection (collectors)
+
+This module is responsible for ingesting financial data from a multitude of external sources. It contains specialized collectors for different asset classes:
+- master_collector.py: Orchestrates the entire data collection process.
+- stocksmanager.py, etfmanager.py, mutualfundmanager.py, crypto_manager.py: Manage the master list of assets for each class.
+- dailypricecollector.py: Fetches historical and real-time price data.
+- fundamentals_collector.py: Gathers fundamental financial data for stocks.
+- collect_news.py: Collects news articles related to financial markets and assets.
+
+2. Data Persistence (models)
+
+This module defines the database schema using SQLAlchemy ORM. It translates high-level objects into database tables and manages the relationships between them. Key models include:
+- Asset: A universal table for all tradable instruments (stocks, ETFs, crypto, etc.).
+- DailyPrice: Stores historical price data for each asset.
+- QuarterlyFundamental: Contains quarterly financial statement data for companies.
+- NewsArticle: Stores collected news articles and associated metadata like sentiment.
+
+3. Core Logic (roboadvisor)
+
+This is the analytical heart of Lumia. It contains the algorithms and business logic for generating investment advice:
+- user_profile.py: Creates a detailed investor profile based on their risk tolerance, goals, and financial situation.
+- asset_selector.py: Filters and ranks assets based on quantitative and qualitative metrics.
+- optimizer.py: Implements portfolio optimization algorithms (e.g., Mean-Variance Optimization) to find the optimal asset allocation.
+- recommender.py: Generates final, actionable portfolio recommendations for the user.
+
+4. User Interface (app)
+
+This module presents the data and recommendations to the user. It is built using Streamlit, providing an interactive web-based dashboard:
+- app_new.py: The main entry point for the Streamlit application.
+- components.py: A library of reusable UI components (charts, cards, tables).
+- styles.py: Centralized styling for a consistent look and feel.
+- chat_ai.py: An AI-powered chat interface for user queries.
+
+5. Scripts and Utilities (scripts, utils)
+
+- scripts: Contains command-line scripts for administrative tasks, such as running collectors (lumia_collector.py).
+- utils: Provides shared utilities, such as logging configuration (logging_config.py).
+
+4.2 Data Design
+
+4.2.1 Schema Design
+
+The database schema is designed to be robust, scalable, and efficient. It is defined using SQLAlchemy ORM, which allows for database-agnostic development. The core of the schema revolves around a centralized assets table, which acts as a master list for all investment instruments.
+
+Key Tables:
+
+- assets: This is the central table, storing common information for every asset, such as symbol, name, type (stock, ETF, crypto), exchange, and currency. It uses a single-table design to represent multiple asset types, differentiated by the type column.
+- daily_prices: A time-series table linked to the assets table via a foreign key. It stores the open, high, low, close, and volume for each asset for each day. This table is optimized for fast retrieval of historical price data.
+- quarterly_fundamentals: Stores quarterly financial data for stocks, such as revenue, net income, and EPS. It is linked to the assets table.
+- news_articles: Contains news data, including the headline, source, publication date, and a link to the article. It also stores derived metadata like sentiment scores.
+- collector_runs: A logging table that tracks the execution history of data collectors, recording the start time, end time, status, and number of records processed.
+
+Relationships are defined between tables to ensure relational integrity. For example, a one-to-many relationship exists between assets and daily_prices.
+
+4.2.2 Data Integrity and Constraints
+
+Data integrity is enforced at the database level through a series of constraints defined in the SQLAlchemy models:
+
+- Primary Keys: Each table has a primary key (id) to uniquely identify each record.
+- Foreign Keys: Relationships between tables are enforced using foreign keys. For example, dailyprices.assetid is a foreign key referencing assets.id. This ensures that no price data can exist for a non-existent asset.
+- Unique Constraints: Business keys are enforced with unique constraints. For example, the symbol in the assets table is unique to prevent duplicate instruments.
+- Not-Null Constraints: Critical columns like assets.name and assets.type are defined as non-nullable, ensuring that essential data is always present.
+- Data Types: Each column is defined with a specific data type (e.g., String, Integer, Float, TIMESTAMP) to ensure that the stored data is in the correct format.
+- Cascading Rules: The cascade="all, delete-orphan" option is used on relationships to ensure that when an asset is deleted, all its associated data (prices, fundamentals) are also deleted, preventing orphaned records.
+
+4.3 Procedural Design
+
+4.3.1 Logic Diagrams
+
+The overall logic of the Lumia system follows a clear, linear flow from data acquisition to user recommendation.
+
+Data Flow:
+1. Data Collection: The collectors are run on a schedule to fetch raw data from various APIs and sources.
+2. Data Storage: The raw data is cleaned, transformed, and stored in the PostgreSQL database according to the defined models.
+3. User Input: The user interacts with the Streamlit app, providing their financial goals, risk tolerance, and investment horizon.
+4. Profile Generation: The roboadvisor.user_profile module processes the user's input to create a comprehensive investor profile.
+5. Asset Screening: The roboadvisor.asset_selector module queries the database and filters the universe of assets to a smaller, suitable subset based on the user's profile and market conditions.
+6. Portfolio Optimization: The roboadvisor.optimizer takes the screened assets and runs optimization algorithms to determine the ideal percentage allocation for each asset.
+7. Recommendation: The roboadvisor.recommender module formats the optimized portfolio into a clear, actionable recommendation.
+8. UI Display: The final recommendation, along with supporting charts and data, is rendered in the user-friendly Streamlit interface.
+
+4.3.2 Data Structures
+
+The primary data structures used in the Lumia system are:
+
+- SQLAlchemy ORM Objects: These Python objects are the in-memory representation of the database records (e.g., Asset, DailyPrice). They are used for all database interactions.
+- Pandas DataFrames: DataFrames are used extensively for data manipulation, analysis, and time-series processing. For example, historical price data is loaded into a DataFrame to calculate returns and volatility. The results of database queries are often converted to DataFrames for easier handling.
+- Dictionaries and Lists: Standard Python dictionaries and lists are used for configuration, storing intermediate results, and passing data between functions. For example, a user's profile is represented as a dictionary.
+
+4.3.3 Algorithms Design
+
+The core of the robo-advisor's intelligence lies in the algorithms used for portfolio construction.
+
+- Asset Scoring and Ranking: The asset_selector uses a multi-factor scoring model. Assets are scored based on a combination of metrics like historical returns, volatility, Sharpe ratio, and fundamental data (for stocks). Each factor is assigned a weight, and a composite score is calculated for each asset.
+- Mean-Variance Optimization (MVO): The optimizer module implements the MVO algorithm, a cornerstone of Modern Portfolio Theory. It takes the expected returns, standard deviations, and correlation matrix of the selected assets as input. The algorithm then finds the portfolio allocation that maximizes expected return for a given level of risk (or minimizes risk for a given level of return). This results in the "efficient frontier," and the optimal portfolio is selected from this frontier based on the user's risk profile.
+- Sentiment Analysis: The collect_news module may incorporate Natural Language Processing (NLP) to perform sentiment analysis on news articles. This provides a qualitative overlay on the quantitative models, helping to gauge market mood.
+
+4.4 User Interface Design
+
+The user interface is a web-based dashboard built with Streamlit. The design philosophy is to be clean, intuitive, and data-rich without being overwhelming.
+
+- Layout: The UI uses a wide layout with a collapsible sidebar. The main content area is organized into logical sections using tabs or expanders (e.g., "Dashboard," "Portfolio," "Analysis").
+- Components: A library of custom components (components.py) is used to ensure a consistent look and feel. This includes:
+- metric_card: To display key performance indicators (KPIs) like portfolio value or returns.
+- section_header: For clear and consistent section titles.
+- Charts: Donut charts for asset allocation (createdonutchart), bar charts for performance comparison (createbarchart), and gauges for risk/return visualization (createriskreturn_gauge).
+- Interactivity: The UI is interactive, allowing users to adjust inputs like their risk tolerance and see the recommended portfolio update in real-time. Tooltips and help icons provide additional information.
+- Styling: CSS is injected via the styles.py module to override default Streamlit styles and create a branded, professional appearance.
+- AI Chat: An integrated AI chat (chat_ai.py) allows users to ask natural language questions about their portfolio or the market, providing a more conversational and guided experience.
+
+4.5 Security Issues
+
+Security is a critical consideration for a financial application. The following measures are considered:
+
+- Data Encryption: All sensitive data, both in transit (using HTTPS) and at rest (database-level encryption), should be encrypted.
+- Authentication and Authorization: While not explicitly implemented yet, a production version would require robust user authentication (e.g., OAuth2) to ensure that users can only access their own data.
+- API Key Management: Keys for external data source APIs are stored securely using environment variables or a secret management service, not hardcoded in the source code.
+- Input Validation: All user input is validated and sanitized to prevent common web vulnerabilities like SQL Injection and Cross-Site Scripting (XSS). The use of an ORM like SQLAlchemy provides a strong defense against SQL injection.
+- Dependency Scanning: Regularly scan third-party libraries for known vulnerabilities.
+- Principle of Least Privilege: The database user for the application should have the minimum necessary permissions, rather than full administrative rights.
+
+4.6 Test Cases Design
+
+A comprehensive testing strategy is essential to ensure the accuracy, reliability, and robustness of the Lumia system.
+
+- Unit Tests: Each function and module should be tested in isolation. For example:
+- Test that the dailypricecollector correctly parses data from the API.
+- Test that the optimizer calculates the correct efficient frontier for a known set of inputs.
+- Test that the format_currency utility function in the app formats numbers correctly.
+- Integration Tests: These tests verify that different modules work together as expected. For example:
+- Test the full data pipeline from the master_collector to the database.
+- Test the interaction between the user_profile module and the recommender module.
+- End-to-End (E2E) Tests: These tests simulate a full user journey. For example:
+- A script could use a tool like Selenium or Playwright to interact with the Streamlit UI, enter user data, and verify that the correct portfolio recommendation is displayed.
+- Data Validation Tests: These are specific tests to ensure the quality of the financial data. For example:
+- Check for gaps in historical price data.
+- Check for outliers or anomalous values in fundamental data.
+- Backtesting: The roboadvisor's strategies will be rigorously backtested against historical data to evaluate their performance in different market conditions.

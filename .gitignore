@@ -191,7 +191,47 @@ uploads/
 downloads/
 cache/
 
-#alembic
+# Frontend dependencies and build files
+frontend/node_modules/
+frontend/dist/
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# React specific
+frontend/.eslintcache
+frontend/coverage/
+
+# Package manager files
+frontend/package-lock.json
+frontend/yarn.lock
+frontend/pnpm-lock.yaml
+
+# Environment variables
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Alembic
 alembic.ini
 alembic/env.py
 alembic/script.py.mako

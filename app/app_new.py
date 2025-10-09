@@ -21,6 +21,7 @@ from components import (
     create_score_distribution, create_risk_return_gauge, chat_message
 )
 from styles import get_main_styles
+from chat_ai import LumiaAI
 
 # Page config
 st.set_page_config(
@@ -42,111 +43,6 @@ def format_currency(amount):
         return f"₹{amount/100000:.2f} L"
     else:
         return f"₹{amount:,.0f}"
-
-
-def generate_chat_response(question: str, portfolio_data: dict) -> str:
-    """Generate intelligent responses based on portfolio data"""
-    question_lower = question.lower()
-    
-    profile = portfolio_data['profile']
-    metrics = portfolio_data['metrics']
-    portfolio = portfolio_data['portfolio']
-    
-    # Calculate portfolio stats
-    total_assets = portfolio_data.get('total_assets', 0)
-    capital = profile['capital']
-    risk_type = profile.get('risk_type', 'moderate')
-    years = profile.get('years', 5)
-    
-    # Asset type breakdown
-    asset_breakdown = {}
-    for asset_type, assets in portfolio.items():
-        if assets:
-            total = sum(a.get('allocation_amount', 0) for a in assets)
-            count = len(assets)
-            asset_breakdown[asset_type] = {'total': total, 'count': count, 'percentage': (total/capital)*100}
-    
-    # Why this allocation?
-    if 'why' in question_lower and 'allocation' in question_lower:
-        stocks_pct = asset_breakdown.get('stocks', {}).get('percentage', 0)
-        etf_pct = asset_breakdown.get('etf', {}).get('percentage', 0)
-        mf_pct = asset_breakdown.get('mutual_funds', {}).get('percentage', 0)
-        crypto_pct = asset_breakdown.get('crypto', {}).get('percentage', 0)
-        
-        return f"""Your portfolio is allocated based on your **{risk_type}** risk profile and **{years}-year** horizon:
-
-• **Stocks ({stocks_pct:.1f}%)**: High-growth potential, selected from {asset_breakdown.get('stocks', {}).get('count', 0)} top-scored companies
-• **ETFs ({etf_pct:.1f}%)**: Diversified sector exposure with lower volatility
-• **Mutual Funds ({mf_pct:.1f}%)**: Professional management for stable returns
-• **Crypto ({crypto_pct:.1f}%)**: High-risk, high-reward allocation
-
-This mix aims for **{metrics['expected_return']*100:.2f}% annual return** with a **Sharpe ratio of {metrics['sharpe_ratio']:.2f}**, balancing growth and risk."""
-    
-    # Single stock questions
-    elif 'single stock' in question_lower or 'one stock' in question_lower:
-        stocks = portfolio.get('stocks', [])
-        if stocks:
-            best_stock = max(stocks, key=lambda x: x.get('score', 0))
-            return f"""Investing in a **single stock is risky** due to lack of diversification. However, if you insist:
-
-**Top Pick**: {best_stock.get('name', 'N/A')} ({best_stock.get('symbol', 'N/A')})
-• **Score**: {best_stock.get('score', 0):.1f}/100
-• **Suggested Amount**: ₹{best_stock.get('allocation_amount', 0):,.0f}
-
-⚠️ **Warning**: Single-stock portfolios have:
-- 3-5x higher volatility
-- No sector diversification
-- Higher risk of total loss
-
-**Recommendation**: Invest in at least 3-5 stocks across different sectors for better risk management."""
-        return "No stocks available in your current portfolio configuration."
-    
-    # Risk questions
-    elif 'risk' in question_lower:
-        return f"""Your portfolio's risk profile:
-
-• **Risk Level**: {risk_type.title()}
-• **Expected Volatility**: {metrics['expected_risk']*100:.2f}%
-• **Sharpe Ratio**: {metrics['sharpe_ratio']:.2f} (risk-adjusted return)
-
-**What this means**:
-- Higher Sharpe = Better return per unit of risk
-- Your portfolio is optimized to maximize returns while controlling downside risk
-- Diversification across {total_assets} assets reduces overall volatility"""
-    
-    # Return/growth questions
-    elif 'return' in question_lower or 'growth' in question_lower or 'profit' in question_lower:
-        expected_value = capital * (1 + metrics['expected_return']) ** years
-        profit = expected_value - capital
-        return f"""Expected returns for your ₹{capital:,.0f} investment:
-
-**Annual Return**: {metrics['expected_return']*100:.2f}%
-**Time Horizon**: {years} years
-
-**Projected Growth**:
-• **Year 1**: ₹{capital * (1 + metrics['expected_return']):.0f}
-• **Year 3**: ₹{capital * (1 + metrics['expected_return'])**3:.0f}
-• **Year {years}**: ₹{expected_value:.0f}
-
-**Total Profit**: ₹{profit:,.0f} ({(profit/capital)*100:.1f}% gain)
-
-*Note: These are projections based on historical data. Actual returns may vary.*"""
-    
-    # Default response
-    else:
-        return f"""I can help you understand your portfolio better! Here's a quick overview:
-
-• **Total Investment**: ₹{capital:,.0f}
-• **Assets**: {total_assets} holdings across {len([k for k,v in asset_breakdown.items() if v['count'] > 0])} asset classes
-• **Expected Return**: {metrics['expected_return']*100:.2f}% annually
-• **Risk**: {risk_type.title()} profile
-
-**Ask me**:
-- "Why this allocation?"
-- "What if I invest in a single stock?"
-- "What are my expected returns?"
-- "How risky is this portfolio?"
-- "Which is my best performing asset?" """
 
 
 def render_portfolio_table(asset_type: str, assets: list):
@@ -189,6 +85,8 @@ def main():
         st.session_state.portfolio = None
     if 'chat_history' not in st.session_state:
         st.session_state.chat_history = []
+    if 'lumia_ai' not in st.session_state:
+        st.session_state.lumia_ai = LumiaAI()
     
     # Header
     st.markdown("""
@@ -395,8 +293,8 @@ def main():
             # Add user message
             st.session_state.chat_history.append({'role': 'user', 'content': user_input})
             
-            # Generate intelligent response
-            response = generate_chat_response(user_input, result)
+            # Generate AI response using Lumia AI
+            response = st.session_state.lumia_ai.analyze_question(user_input, result)
             st.session_state.chat_history.append({'role': 'assistant', 'content': response})
             st.rerun()
         

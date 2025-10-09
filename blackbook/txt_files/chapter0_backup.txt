@@ -1,0 +1,151 @@
+PROJECT REPORT
+SUBMITTED TO
+DEPARTMENT OF COMPUTER SCIENCE
+BHAVNA TRUST JUNIOR AND DEGREE
+COLLEGE OF COMMERCE AND SCIENCE
+DEONAR MUMBAI – 400088
+(Affiliate by University of Mumbai)
+Lumia Robo-Advisor
+For Partial Fulfilment for degree of
+Bachelor of Science
+(COMPUTER SCIENCE)
+2025-2026
+
+HEAD OF DEPARTMENTMr. Alok K. Singh
+PROJECT GUIDEMrs. Swati Shingate
+
+SUBMITTED BY
+MUJAMMIL SALIM MAHALDAR
+
+BHAVNA TRUST JUNIOR AND DEGREE COLLEGE
+OF COMMERCE AND SCIENCE
+DEONAR MUMBAI - 400088
+DEPARTMENT OF COMPUTER SCIENCE
+Certificate
+This is to certify that
+MUJAMMIL SALIM MAHALDAR
+
+of T.Y. B.Sc. (CS). Seat no 22325 has successfully completed the project work in the subject of Project work I as prescribed by University of Mumbai during the year 2025 – 2026.
+
+_____Internal Examiner
+_____External Examiner
+
+______HOD
+______Stamp
+
+DATE:
+
+DECLARATION
+
+I, Mujammil Salim Mahaldar, hereby declare that the project work titled “Lumia Robo-Advisor”, submitted to Bhavna Trust Junior and Degree College, Maharashtra, is my original work carried out by me in partial fulfilment of the requirements for the Bachelor of Computer Science (B.Sc. CS) degree.
+This project has been developed with complete sincerity, dedication, and independent effort. The entire process — from research and design to development and testing — was carefully planned and executed by me. The work presented here has not been submitted to any other university or institution for any degree or diploma.
+During the development of the Lumia Robo-Advisor, I referred to various online resources, academic papers on portfolio theory, and documentation for Python libraries such as Pandas, SQLAlchemy, and Streamlit. These references were crucial for implementing the core financial logic and building an interactive, data-driven user interface.
+I am sincerely grateful to my project guide and faculty mentors for their valuable guidance, encouragement, and constructive feedback throughout the project. Their constant support and insights have played a vital role in the successful completion of this work.
+I hereby take full responsibility for the authenticity and originality of this project report. It truly reflects my own learning, creativity, and practical understanding of software development and financial technology.
+
+Sr. No. Name Project Title Institution Signature
+1 Bhavna Trust Jr. and Degree College, Maharashtra
+
+Date:
+
+ACKNOWLEDGEMENT
+I would like to express my heartfelt gratitude to everyone who supported me in the successful completion of my project, “Lumia Robo-Advisor”. This project has been a significant learning experience, and it would not have been possible without the guidance, encouragement, and support of many individuals.
+Firstly, I am deeply grateful to my college, Bhavna Trust Junior and Degree College, and the Department of Computer Science for providing me with the opportunity and resources to undertake this project. I extend my sincere thanks to the Head of Department, Mr. Alok K. Singh, and my project guide, Mrs. Swati Shingate, for their invaluable mentorship, constructive feedback, and unwavering support throughout the development process. Their guidance was instrumental in navigating the complexities of financial modeling and software implementation.
+I would also like to acknowledge the immense support provided by the open-source community. The availability of powerful Python libraries like Pandas, SQLAlchemy, and Streamlit was crucial for the development of this project. Online resources, academic papers on Modern Portfolio Theory, and financial data APIs provided the foundational knowledge required to build a robust and data-driven application.
+Finally, I wish to thank my family and friends for their constant encouragement and patience. Their support was a source of motivation during challenging times.
+Thank you!
+
+ABSTRACT
+
+Lumia is a sophisticated, multi-asset robo-advisor designed to democratize investment management for individual investors. The platform addresses the challenges of modern portfolio construction by providing a unified system for analyzing and allocating capital across diverse asset classes, including stocks, ETFs, and cryptocurrencies. Traditional investment approaches are often fragmented, expensive, and lack personalization. Lumia overcomes these limitations by integrating automated data collection, quantitative financial modeling, and a highly interactive user interface into a seamless experience.
+
+The system is implemented using Python 3.10+, with a backend powered by SQLAlchemy for ORM and a PostgreSQL database for robust data persistence. The analytical core leverages the Pandas library for data manipulation and implements Modern Portfolio Theory principles, specifically Mean-Variance Optimization, to construct portfolios tailored to an individual's risk tolerance and investment horizon. The frontend is a dynamic, web-based dashboard built with Streamlit, offering users intuitive data visualizations, real-time portfolio adjustments, and an AI-powered chat for natural language queries.
+
+Data integrity is ensured through a well-defined schema with relational constraints, managed by Alembic migrations. The modular architecture separates concerns into distinct packages for data collection, database models, core advisory logic, and the user interface, promoting maintainability and scalability. Security is addressed through environment-based management of API keys and the use of ORM to prevent SQL injection.
+
+Testing involves a multi-layered approach, including unit tests for core logic, integration tests for the data pipeline, and end-to-end validation of the user recommendation flow. The result is a reliable and data-driven platform that provides personalized, algorithm-powered investment advice, making sophisticated financial strategies accessible to a wider audience. Future enhancements could include the integration of advanced machine learning models for return prediction and automated portfolio rebalancing through brokerage API connections.
+
+INDEX
+
+| Chapter No. | Title | Page No. |
+|:---:|:---|:---:|
+
+CHAPTER 1: INTRODUCTION
+
+| 1.1 | Background | 1 |
+| 1.2 | Objectives | 2 |
+| 1.3 | Purpose, Scope, and Applicability | 3-5 |
+| 1.3.1 | Purpose | 3 |
+| 1.3.2 | Scope | 3-4 |
+| 1.3.3 | Applicability | 4-5 |
+| 1.4 | Achievements | 6 |
+| 1.5 | Organisation of Report | 7-8 |
+
+---
+
+CHAPTER 2: SURVEY OF TECHNOLOGIES
+
+| 2.1 | Technology Overview | 9-12 |
+
+---
+
+CHAPTER 3: REQUIREMENTS AND ANALYSIS
+
+| 3.1 | Problem Definition | 13-14 |
+| 3.2 | Requirements Specification | 15 |
+| 3.3 | Planning and Scheduling | 16-19 |
+| 3.4 | Software and Hardware Requirements | 20-22 |
+| 3.5 | Preliminary Product Description | 23-24 |
+| 3.6 | Conceptual Models | 25-26 |
+
+---
+
+CHAPTER 4: SYSTEM DESIGN
+
+| 4.1 | Basic Modules | 27-32 |
+| 4.2 | Data Design | 33-43 |
+| 4.2.1 | Schema Design | 33-36 |
+| 4.2.2 | Data Integrity and Constraints | 37-43 |
+| 4.3 | Procedural Design | 44-46 |
+| 4.3.1 | Logic Diagrams | 44 |
+| 4.3.2 | Data Structures | 45 |
+| 4.3.3 | Algorithms Design | 45-46 |
+| 4.4 | User Interface Design | 47-56 |
+| 4.5 | Security Issues | 57-60 |
+| 4.6 | Test Cases Design | 61-64 |
+
+---
+
+CHAPTER 5: IMPLEMENTATION AND TESTING
+
+| 5.1 | Implementation Approaches | 65 |
+| 5.2 | Coding Details and Code Efficiency | 66-67 |
+| 5.2.1 | Code Efficiency | 66-67 |
+| 5.3 | Testing Approach | 68-70 |
+| 5.3.1 | Unit Testing | 68 |
+| 5.3.2 | Integrated Testing | 69 |
+| 5.3.3 | Performance Testing | 69-70 |
+| 5.4 | Modifications and Improvements | 70 |
+| 5.5 | Test Cases | 71-73 |
+
+
+
+---
+
+CHAPTER 6: RESULTS AND DISCUSSION
+
+| 6.1 | Test Reports | 74-77 |
+| 6.2 | User Documentation | 78-80 |
+
+---
+
+CHAPTER 7: CONCLUSIONS
+
+| 7.1 | Conclusion | 81 |
+| 7.1.1 | Significance of the System | 81 |
+| 7.2 | Future Scope of the Project | 82 |
+| 7.3 | References | 83 |
+
+---
+
+End of Index

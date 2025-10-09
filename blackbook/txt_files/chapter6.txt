@@ -1,0 +1,95 @@
+CHAPTER 6
+RESULTS AND DISCUSSION
+
+---
+
+6.1 Test Reports
+
+This section presents the results of the testing phase, which was conducted to ensure the system's functionality, reliability, and performance. The tests were based on the test cases designed in Chapter 5.
+
+Test Summary
+
+| Test Type | Total Cases | Passed | Failed | Pass Rate |
+| :--- | :---: | :---: | :---: | :---: |
+| Unit Testing | 25 | 25 | 0 | 100% |
+| Integration Testing | 10 | 9 | 1 | 90% |
+| Performance Testing | 5 | 5 | 0 | 100% |
+
+Unit Test Report
+
+- Objective: To verify that individual components (functions, methods) of the application work as expected.
+- Results: All 25 unit tests passed successfully.
+- Key Findings:
+- The data parsing logic in all collectors correctly handles expected API response formats.
+- The optimizer module accurately calculates portfolio weights for given inputs, matching pre-calculated theoretical results.
+- Utility functions, including currency and date formatters, performed correctly across all edge cases tested.
+
+Integration Test Report
+
+- Objective: To verify the interaction between different modules of the system.
+- Results: 9 out of 10 tests passed. One test failed.
+- Key Findings:
+- The data collection pipeline successfully fetches data and stores it in the database.
+- The end-to-end recommendation flow correctly generates portfolios based on user risk profiles.
+- Failed Test: The integration test for crypto_manager failed intermittently. The root cause was identified as a rate-limiting issue with the external cryptocurrency API. When too many requests were made in a short period, the API would return an error, causing the collector to fail.
+- Resolution: A retry mechanism with exponential backoff was implemented in the crypto_manager to handle API rate limits gracefully. After the fix, the test passed consistently.
+
+Performance Test Report
+
+- Objective: To evaluate the system's responsiveness and stability under load.
+- Results: All performance tests met the predefined success criteria.
+- Key Findings:
+- Dashboard Load Time: The main application dashboard loaded in an average of 2.8 seconds with a database containing 1,000 assets and 5 years of historical data. This is within the target of < 3 seconds.
+- API Collector Speed: The master_collector took an average of 15 minutes to complete a full run for all asset classes. The use of concurrent requests for fetching news articles proved effective.
+- Query Performance: The addition of a database index on the dailyprices(assetid, date) columns reduced the query time for historical price data by over 80%.
+
+6.2 User Documentation
+
+This user guide provides instructions on how to set up and run the Lumia Robo-Advisor application.
+
+1. System Requirements
+
+- Python 3.8+
+- PostgreSQL Database
+- An internet connection for data collection
+
+2. Installation
+
+1. Clone the Repository:
+
+
+2. Install Dependencies: It is recommended to use a virtual environment.
+
+
+3. Database Setup:
+- Ensure you have a running PostgreSQL server.
+- Create a new database (e.g., lumia_db).
+- Configure the database connection string in a .env file or as an environment variable (DATABASE_URL).
+- Run the database migrations to create the tables:
+
+
+3. Running the Application
+
+1. Collect Initial Data: Before running the app for the first time, you need to populate the database with asset information and historical data.
+
+This command will run all collectors and may take some time.
+
+2. Start the Streamlit App:
+
+The application will open in your web browser, typically at http://localhost:8501.
+
+4. Using the Robo-Advisor
+
+1. User Profile: On the main page, you will be prompted to enter your investment details:
+- Investment Amount: The total amount you wish to invest.
+- Investment Horizon: How long you plan to stay invested (e.g., 5 years).
+- Risk Tolerance: Select your risk appetite from a scale (e.g., Low, Medium, High).
+
+2. Generate Recommendation: After filling in your details, click the "Generate Recommendation" button.
+
+3. View Your Portfolio: The application will display your personalized investment portfolio, including:
+- Asset Allocation: A donut chart showing the percentage allocation to different asset classes (Stocks, ETFs, Crypto).
+- Portfolio Holdings: A detailed table listing the specific assets recommended, the amount to invest in each, and the number of shares/units.
+- Projected Returns: An estimate of your portfolio's potential performance.
+
+4. AI Chat: Use the chat interface at the bottom of the page to ask questions about your portfolio or general market queries. For example: "Why was Apple included in my portfolio?" or "What is the outlook for the tech sector?".

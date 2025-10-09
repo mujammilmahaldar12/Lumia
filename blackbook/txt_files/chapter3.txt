@@ -1,0 +1,855 @@
+CHAPTER 3
+REQUIREMENTS AND ANALYSIS
+
+---
+
+3.1 Problem Definition
+
+The contemporary investment landscape presents significant challenges for individual investors seeking to optimize their portfolio allocation across diverse asset classes. Traditional investment advisory services are often expensive, inaccessible to retail investors, and lack the sophistication to simultaneously consider multiple asset classes including equities, mutual funds, exchange-traded funds (ETFs), and cryptocurrencies. The primary problems addressed by the Lumia system include:
+
+1. Complexity in Multi-Asset Portfolio Construction
+
+Modern investors face the daunting task of analyzing thousands of investment instruments across different asset classes. Each asset class operates under different market dynamics, risk profiles, and correlation patterns. Without sophisticated analytical tools, investors struggle to:
+
+- Evaluate the comparative advantages of different asset types
+- Understand correlation patterns across asset classes
+- Balance risk-return tradeoffs in a unified framework
+- Allocate capital efficiently across diverse investment vehicles
+
+2. Information Asymmetry and Data Fragmentation
+
+Investment data is scattered across multiple platforms, formats, and sources. Retail investors lack access to:
+
+- Consolidated real-time market data across all asset classes
+- Fundamental analysis metrics for comprehensive asset evaluation
+- Sentiment analysis from news and social media
+- Historical performance data for backtesting strategies
+- Technical indicators and quantitative signals
+
+3. Lack of Personalized Investment Recommendations
+
+Existing robo-advisory platforms often provide generic recommendations that fail to account for:
+
+- Individual risk tolerance profiles beyond simple questionnaires
+- Specific investment horizons and financial goals
+- Tax implications and regulatory constraints
+- Behavioral biases and emotional factors
+- Dynamic market conditions requiring portfolio rebalancing
+
+4. Absence of Integrated Decision Support Systems
+
+Most investment platforms operate in silos, focusing on single asset classes. Investors need:
+
+- Unified interface for analyzing multiple asset classes simultaneously
+- AI-powered conversational interface for portfolio insights
+- Real-time portfolio performance monitoring and analytics
+- Automated rebalancing recommendations
+- Educational resources integrated with personalized advice
+
+The Lumia project addresses these challenges by developing an intelligent, data-driven robo-advisory platform that democratizes access to sophisticated portfolio management capabilities traditionally available only to high-net-worth individuals and institutional investors.
+
+Page 13
+
+5. Computational Challenges in Portfolio Optimization
+
+Optimal portfolio construction requires solving complex mathematical optimization problems:
+
+- Mean-variance optimization with non-linear constraints
+- Multi-objective optimization balancing return, risk, and diversification
+- Dynamic programming for time-series portfolio rebalancing
+- Computational complexity scaling with number of assets (O(n²) covariance matrices)
+- Real-time optimization requirements for responsive user experience
+
+6. Trust and Transparency Gap
+
+Retail investors often distrust automated investment systems due to:
+
+- Lack of explainability in recommendation algorithms
+- Black-box decision-making processes
+- Inability to understand why specific assets are recommended
+- Absence of interactive querying capabilities
+- Limited educational content explaining investment principles
+
+7. Market Data Quality and Consistency Issues
+
+Maintaining high-quality, consistent financial data presents significant challenges:
+
+- Handling missing data and corporate actions (splits, dividends)
+- Synchronizing data from multiple API sources with different formats
+- Managing rate limits and API reliability issues
+- Ensuring data freshness for time-sensitive decisions
+- Validating data accuracy and detecting anomalies
+
+The Lumia system is designed as a comprehensive solution that integrates data collection, analysis, optimization, and user interaction into a cohesive platform. By leveraging modern data science techniques, portfolio theory, and artificial intelligence, Lumia transforms the investment advisory process into an accessible, transparent, and highly personalized experience for retail investors.
+
+The scope of the problem extends beyond mere portfolio recommendation to encompass the entire investment lifecycle—from initial risk profiling and asset discovery to ongoing portfolio monitoring and rebalancing. The system must handle diverse user profiles ranging from conservative investors seeking stable income to aggressive traders pursuing maximum growth, while maintaining robust risk management protocols.
+
+Page 14
+
+---
+
+3.2 Requirements Specification
+
+The Lumia robo-advisory platform's requirements are categorized into functional, non-functional, and system requirements to ensure comprehensive coverage of all stakeholder needs.
+
+3.2.1 Functional Requirements
+
+FR1: User Profile Management
+- FR1.1: System shall capture user investment capital (minimum ₹10,000)
+- FR1.2: System shall assess risk tolerance on 0-100 scale with semantic labels
+- FR1.3: System shall record expected growth percentage targets
+- FR1.4: System shall validate all user inputs with appropriate error messages
+
+FR2: Multi-Asset Data Collection
+- FR2.1: System shall collect daily price data for 16,000+ assets (stocks, ETFs, mutual funds, cryptocurrencies)
+- FR2.2: System shall retrieve quarterly fundamental data for equity securities
+- FR2.3: System shall aggregate financial news with sentiment analysis
+- FR2.4: System shall maintain data freshness with automated collection schedules
+- FR2.5: System shall log all data collection operations with success/failure status
+
+FR3: Asset Scoring and Evaluation
+- FR3.1: System shall compute comprehensive scores (0-100) for each asset based on:
+- Price momentum and technical indicators (20 points)
+- Fundamental quality metrics (30 points)
+- News sentiment analysis (20 points)
+- Risk-adjusted returns (30 points)
+- FR3.2: System shall apply asset class-specific scoring methodologies
+- FR3.3: System shall filter out assets with insufficient data quality
+
+FR4: Portfolio Optimization
+- FR4.1: System shall implement Modern Portfolio Theory (MPT) with mean-variance optimization
+- FR4.2: System shall generate diversified portfolios selecting 5-8 assets
+- FR4.3: System shall respect risk tolerance constraints in asset allocation
+- FR4.4: System shall maximize Sharpe ratio while meeting user-defined constraints
+- FR4.5: System shall provide allocation amounts and percentages for each recommended asset
+
+FR5: Interactive Visualization
+- FR5.1: System shall display portfolio allocation using interactive donut charts
+- FR5.2: System shall present individual asset allocations with horizontal bar charts
+- FR5.3: System shall render risk metrics using gauge visualizations
+- FR5.4: System shall show expected returns and Sharpe ratio with visual indicators
+- FR5.5: System shall create box plots for return distribution analysis
+
+FR6: AI-Powered Conversational Interface
+- FR6.1: System shall provide natural language query interface for portfolio insights
+- FR6.2: System shall recognize 9+ intent categories (allocation, best asset, risk, returns, comparison, diversification, sectors, greeting, help)
+- FR6.3: System shall maintain conversation history for context-aware responses
+- FR6.4: System shall provide detailed explanations for all recommendations
+- FR6.5: System shall handle question variations and synonyms intelligently
+
+FR7: Portfolio Analytics and Reporting
+- FR7.1: System shall calculate key performance metrics (expected return, volatility, Sharpe ratio)
+- FR7.2: System shall provide asset-level attribution analysis
+- FR7.3: System shall present diversification scores and correlation matrices
+- FR7.4: System shall enable portfolio comparison scenarios
+- FR7.5: System shall generate downloadable portfolio reports
+
+Page 15
+
+3.2.2 Non-Functional Requirements
+
+NFR1: Performance Requirements
+- NFR1.1: Portfolio generation shall complete within 10 seconds for typical user inputs
+- NFR1.2: Database queries shall return results within 2 seconds
+- NFR1.3: Page load time shall not exceed 3 seconds
+- NFR1.4: System shall support concurrent users without performance degradation
+- NFR1.5: Optimization algorithms shall handle 10,000+ assets efficiently
+
+NFR2: Scalability Requirements
+- NFR2.1: System shall scale to accommodate 1 million+ assets in database
+- NFR2.2: Architecture shall support horizontal scaling for increased user load
+- NFR2.3: Data collection pipelines shall process 50,000+ securities daily
+- NFR2.4: Storage system shall handle growing historical data (5+ years)
+
+NFR3: Reliability and Availability
+- NFR3.1: System uptime shall be 99.5% or higher
+- NFR3.2: Data collection failures shall not disrupt user-facing services
+- NFR3.3: System shall implement graceful error handling and recovery
+- NFR3.4: Database shall maintain ACID properties for transactional integrity
+- NFR3.5: Automated backups shall occur daily with 30-day retention
+
+NFR4: Usability Requirements
+- NFR4.1: User interface shall be intuitive requiring no training
+- NFR4.2: System shall provide contextual help and tooltips
+- NFR4.3: Error messages shall be clear and actionable
+- NFR4.4: Color scheme shall ensure readability (WCAG 2.1 compliance)
+- NFR4.5: Mobile responsiveness for tablet and desktop viewing
+
+NFR5: Security Requirements
+- NFR5.1: Database connections shall use encrypted channels
+- NFR5.2: API keys shall be stored in environment variables
+- NFR5.3: Input validation shall prevent SQL injection attacks
+- NFR5.4: Session management shall protect user data privacy
+- NFR5.5: Logging shall exclude sensitive information
+
+NFR6: Maintainability Requirements
+- NFR6.1: Code shall follow PEP 8 style guidelines
+- NFR6.2: Functions shall have comprehensive docstrings
+- NFR6.3: Modular architecture shall enable independent component updates
+- NFR6.4: Version control shall track all code changes
+- NFR6.5: Logging shall facilitate debugging and monitoring
+
+NFR7: Data Quality Requirements
+- NFR7.1: Data accuracy shall be validated against multiple sources
+- NFR7.2: Missing data shall be handled with appropriate imputation strategies
+- NFR7.3: Outlier detection shall identify anomalous data points
+- NFR7.4: Data freshness indicators shall alert users to stale data
+- NFR7.5: Historical data consistency shall be maintained across schema changes
+
+Page 16
+
+---
+
+3.3 Planning and Scheduling
+
+The Lumia project follows an iterative development methodology with clearly defined phases, milestones, and deliverables. The project timeline spans approximately 6 months, divided into distinct phases with overlapping activities to maximize efficiency.
+
+3.3.1 Project Phases and Timeline
+
+Phase 1: Requirements Analysis and Design (4 weeks)
+
+Weeks 1-2: Requirements Gathering
+- Stakeholder interviews and user persona development
+- Market research and competitive analysis
+- Functional and non-functional requirements documentation
+- Technology stack evaluation and selection
+- Deliverable: Requirements Specification Document (RSD)
+
+Weeks 3-4: System Architecture Design
+- Database schema design with normalization
+- Module decomposition and interface specification
+- Algorithm selection for optimization and scoring
+- UI/UX wireframing and mockup creation
+- Security architecture planning
+- Deliverable: System Design Document (SDD)
+
+Phase 2: Development Infrastructure Setup (2 weeks)
+
+Week 5: Environment Configuration
+- PostgreSQL database installation and configuration
+- Python virtual environment setup with dependency management
+- Git repository initialization with branching strategy
+- Development, staging, and production environment setup
+- Deliverable: Configured development environment
+
+Week 6: Data Pipeline Foundation
+- API integration with Yahoo Finance, NewsAPI, CoinGecko
+- Database connection pooling and ORM setup
+- Logging framework implementation
+- Data collector base classes and utilities
+- Deliverable: Functional data collection framework
+
+Phase 3: Core Module Development (8 weeks)
+
+Weeks 7-9: Data Collection Modules
+- Stock data collector implementation
+- Mutual fund and ETF data collectors
+- Cryptocurrency data collector
+- News sentiment analysis integration
+- Fundamental data collection and storage
+- Deliverable: Complete data collection pipeline
+
+Weeks 10-12: Portfolio Optimization Engine
+- Asset scoring algorithm implementation
+- Mean-variance optimization with constraints
+- Risk-return calculation modules
+- Portfolio selection and filtering logic
+- Performance backtesting framework
+- Deliverable: Functional optimization engine
+
+Weeks 13-14: User Interface Development
+- Streamlit application framework setup
+- Input forms and validation logic
+- Interactive chart components (Plotly integration)
+- Portfolio display and analytics views
+- Responsive layout and styling
+- Deliverable: Functional web interface
+
+Phase 4: AI Integration and Enhancement (3 weeks)
+
+Weeks 15-16: Conversational AI Development
+- LumiaAI class implementation with intent recognition
+- Natural language processing for query understanding
+- Context-aware response generation
+- Conversation history management
+- Deliverable: Intelligent chat assistant
+
+Week 17: Advanced Analytics
+- Diversification scoring algorithms
+- Sector allocation analysis
+- Correlation matrix computations
+- Asset comparison tools
+- Deliverable: Enhanced analytics capabilities
+
+Page 17
+
+Phase 5: Testing and Quality Assurance (4 weeks)
+
+Weeks 18-19: Unit and Integration Testing
+- Unit tests for all modules (pytest framework)
+- Integration tests for data pipelines
+- API endpoint testing
+- Database transaction testing
+- Error handling and edge case validation
+- Deliverable: Test suite with 80%+ code coverage
+
+Weeks 20-21: System and Performance Testing
+- End-to-end system testing
+- Load testing with concurrent users
+- Optimization algorithm performance benchmarks
+- Data accuracy validation against market sources
+- Security vulnerability assessment
+- Deliverable: Test reports and bug fixes
+
+Phase 6: Deployment and Documentation (3 weeks)
+
+Week 22: Deployment Preparation
+- Production environment configuration
+- Database migration scripts
+- Automated backup setup
+- Monitoring and alerting configuration
+- Deliverable: Production-ready deployment
+
+Week 23: User Documentation
+- User manual and getting started guide
+- API documentation for extensibility
+- Administrator guide for maintenance
+- Troubleshooting and FAQ documentation
+- Deliverable: Comprehensive documentation suite
+
+Week 24: Final Review and Handover
+- System walkthrough and training
+- Performance optimization final pass
+- Code review and refactoring
+- Project retrospective and lessons learned
+- Deliverable: Production deployment and final report
+
+3.3.2 Resource Allocation
+
+Human Resources:
+- Project Lead/Architect: Full-time (24 weeks)
+- Backend Developer: Full-time (18 weeks)
+- Frontend Developer: Part-time (8 weeks)
+- QA Engineer: Part-time (6 weeks)
+- Technical Writer: Part-time (3 weeks)
+
+Computational Resources:
+- Development workstation: Intel i7/Ryzen 7, 16GB RAM, 512GB SSD
+- Database server: PostgreSQL on cloud/local server, 8GB RAM, 100GB storage
+- API access: Yahoo Finance (free tier), NewsAPI (paid tier 500 req/day), CoinGecko (free tier)
+
+Software Licenses:
+- Python ecosystem: Open source (NumPy, Pandas, SciPy, SQLAlchemy)
+- Streamlit: Open source framework
+- Plotly: Open source visualization library
+- VS Code: Free IDE with extensions
+- Git/GitHub: Version control and repository hosting
+
+Page 18
+
+3.3.3 Risk Management and Mitigation
+
+Risk 1: API Rate Limiting and Data Availability
+- Impact: High - Could halt data collection
+- Probability: Medium
+- Mitigation: Implement caching, request throttling, fallback data sources, upgrade to paid API tiers
+
+Risk 2: Optimization Algorithm Convergence Issues
+- Impact: High - Poor portfolio recommendations
+- Probability: Medium
+- Mitigation: Multiple solver algorithms (SLSQP, COBYLA), constraint relaxation logic, extensive testing with diverse inputs
+
+Risk 3: Database Performance Degradation
+- Impact: Medium - Slow query response
+- Probability: Medium
+- Mitigation: Index optimization, query profiling, connection pooling, database partitioning strategies
+
+Risk 4: User Interface Complexity
+- Impact: Medium - Poor user adoption
+- Probability: Low
+- Mitigation: User testing sessions, iterative UI refinement, contextual help, progressive disclosure of advanced features
+
+Risk 5: Data Quality and Consistency Issues
+- Impact: High - Incorrect recommendations
+- Probability: High
+- Mitigation: Multi-source validation, anomaly detection algorithms, manual review processes, comprehensive logging
+
+Risk 6: Scope Creep
+- Impact: High - Timeline delays
+- Probability: Medium
+- Mitigation: Strict change control process, prioritized feature backlog, clear MVP definition, regular stakeholder communication
+
+3.3.4 Key Milestones and Checkpoints
+
+| Milestone | Target Week | Deliverable | Success Criteria |
+|:----------|:------------|:------------|:-----------------|
+| Requirements Sign-off | Week 4 | RSD + SDD | Stakeholder approval |
+| Data Pipeline Completion | Week 9 | Populated database | 10,000+ assets with 90+ days history |
+| Optimization Engine Ready | Week 12 | Working portfolios | Sharpe ratio > 1.0 on test cases |
+| UI Beta Release | Week 14 | Streamlit app | All core features functional |
+| AI Assistant Integration | Week 17 | Chat interface | 90%+ intent recognition accuracy |
+| Testing Complete | Week 21 | Test reports | 0 critical bugs, 80%+ coverage |
+| Production Deployment | Week 24 | Live system | System operational 99.5% uptime |
+
+The project schedule incorporates buffer time for unforeseen challenges and allows for iterative refinement based on testing feedback. Regular sprint reviews (bi-weekly) ensure alignment with objectives and enable early detection of issues. The modular architecture facilitates parallel development streams, optimizing resource utilization and reducing overall project duration.
+
+Page 19
+
+---
+
+3.4 Software and Hardware Requirements
+
+The Lumia robo-advisory platform requires specific software and hardware configurations to ensure optimal performance, reliability, and scalability. The requirements are divided into development, deployment, and user access environments.
+
+3.4.1 Software Requirements
+
+Operating System Requirements:
+- Development: Windows 10/11, macOS 10.15+, Ubuntu 20.04+ LTS
+- Production Server: Ubuntu 22.04 LTS (preferred) or Windows Server 2019+
+- Justification: Cross-platform Python compatibility, Linux stability for production
+
+Programming Language and Runtime:
+- Python 3.10 or higher (3.10.x recommended)
+- Rationale: Type hints support, structural pattern matching, performance improvements
+- Virtual environment: venv or conda for dependency isolation
+
+Database Management System:
+- PostgreSQL 14.x or 15.x
+- Extensions: pgtrgm (for text search), btreegin (for indexing)
+- Configuration: Shared buffers 256MB+, effectivecachesize 1GB+
+- Justification: ACID compliance, advanced indexing, JSON support, mature ecosystem
+
+Core Python Libraries:
+- NumPy 1.24+: Numerical computing and array operations
+- Pandas 2.0+: Data manipulation and time-series analysis
+- SciPy 1.10+: Optimization algorithms (SLSQP, minimize)
+- SQLAlchemy 2.0+: Database ORM and query building
+- Alembic 1.11+: Database migration management
+- Streamlit 1.28+: Web application framework
+- Plotly 5.17+: Interactive visualization library
+
+Data Collection Libraries:
+- yfinance 0.2.28+: Yahoo Finance API wrapper
+- requests 2.31+: HTTP client for API calls
+- beautifulsoup4 4.12+: HTML parsing (fallback data sources)
+- python-dotenv 1.0+: Environment variable management
+
+Development Tools:
+- Git 2.40+: Version control
+- Visual Studio Code 1.80+: IDE with Python extensions
+- Pylance: Python language server for IntelliSense
+- Black 23.0+: Code formatter
+- Flake8 6.0+: Code linter
+- pytest 7.4+: Testing framework
+- Jupyter Notebook 7.0+ (optional): Exploratory data analysis
+
+API Services:
+- Yahoo Finance API: Stock, ETF, mutual fund data (free tier sufficient)
+- NewsAPI: Financial news aggregation (paid tier recommended, 500 requests/day)
+- CoinGecko API: Cryptocurrency data (free tier, 50 calls/minute)
+
+Additional Software Dependencies:
+- psycopg2-binary 2.9+: PostgreSQL adapter for Python
+- python-dateutil 2.8+: Date parsing and manipulation
+- pytz 2023.3+: Timezone handling
+- typing-extensions 4.7+: Extended type hints
+
+Page 20
+
+3.4.2 Hardware Requirements
+
+Development Environment (Minimum):
+- Processor: Intel Core i5-8th Gen / AMD Ryzen 5 3600 or equivalent
+- RAM: 8GB DDR4 (16GB recommended for large dataset operations)
+- Storage: 256GB SSD with 50GB free space
+- Network: Broadband internet (5 Mbps+ for API calls)
+- Display: 1920×1080 resolution or higher
+
+Development Environment (Recommended):
+- Processor: Intel Core i7-10th Gen / AMD Ryzen 7 5800X or better
+- RAM: 16GB DDR4-3200 (32GB for optimal performance)
+- Storage: 512GB NVMe SSD with 100GB free space
+- Network: High-speed internet (25 Mbps+ for concurrent API calls)
+- Display: 2560×1440 resolution with dual monitors
+
+Production Server Environment:
+- Processor: 4-core CPU @ 2.5GHz+ (8-core for high concurrency)
+- RAM: 8GB minimum (16GB recommended for database caching)
+- Storage: 100GB SSD for database and application
+- Database volume: 50GB allocated
+- Application and logs: 20GB allocated
+- Backup storage: 30GB allocated
+- Network: 100 Mbps bandwidth, static IP address
+- Backup: RAID 1 configuration or cloud backup solution
+
+Database Server Specifications:
+- Dedicated or shared server configuration
+- RAM: 4GB minimum dedicated to PostgreSQL
+- Storage: SSD strongly recommended for query performance
+- IOPS: 3000+ for optimal database operations
+- Backup: Automated daily backups to separate storage
+
+Client/User Access Requirements:
+- Any modern web browser:
+- Google Chrome 100+
+- Mozilla Firefox 100+
+- Microsoft Edge 100+
+- Safari 15+ (macOS/iOS)
+- JavaScript enabled
+- Internet connection: 2 Mbps+ for smooth chart rendering
+- Display: 1366×768 minimum (1920×1080 recommended)
+- No client-side installation required (web-based application)
+
+3.4.3 Network and Connectivity Requirements
+
+Development Environment:
+- Internet bandwidth: 10 Mbps download, 2 Mbps upload
+- Latency: <100ms to API endpoints (Yahoo Finance, NewsAPI servers)
+- Ports: HTTP (80), HTTPS (443) for API calls
+- Firewall: Allow outbound connections to data provider domains
+
+Production Environment:
+- Internet bandwidth: 50 Mbps download, 10 Mbps upload (scales with users)
+- Latency: <50ms for optimal user experience
+- Ports: HTTP (80), HTTPS (443), PostgreSQL (5432), Streamlit (8510 configurable)
+- SSL/TLS: Certificate for secure HTTPS connections (Let's Encrypt recommended)
+- DDoS protection: Cloudflare or equivalent (for public deployment)
+
+Internal Network:
+- Application server ↔ Database server: Gigabit Ethernet (1 Gbps)
+- Latency between tiers: <1ms for local network
+- VPN access: Optional for remote development and administration
+
+Page 21
+
+3.4.4 Scalability and Growth Considerations
+
+Vertical Scaling Path:
+- RAM upgrade to 32GB+ for caching optimization
+- CPU upgrade to 16-core for parallel processing
+- Storage expansion to 500GB+ for historical data retention
+- Database tuning: Increase sharedbuffers to 4GB, workmem to 256MB
+
+Horizontal Scaling Path:
+- Load balancer for distributing user requests (nginx, HAProxy)
+- Read replicas for database query distribution
+- Separate data collection servers from web application servers
+- Redis cache layer for frequently accessed data
+- Microservices architecture for independent module scaling
+
+Cloud Deployment Options:
+- AWS: EC2 (compute), RDS PostgreSQL (database), S3 (storage), CloudFront (CDN)
+- Google Cloud: Compute Engine, Cloud SQL, Cloud Storage
+- Azure: Virtual Machines, Azure Database for PostgreSQL, Blob Storage
+- Estimated cost: $50-200/month depending on user traffic and data volume
+
+3.4.5 Backup and Disaster Recovery
+
+Backup Strategy:
+- Database backups: Daily full backup, hourly incremental (pg_dump, WAL archiving)
+- Retention policy: 30 days rolling window, monthly snapshots for 1 year
+- Backup storage: Off-site location or cloud storage (AWS S3, Google Cloud Storage)
+- Backup verification: Weekly restore testing to validate backup integrity
+- Recovery Time Objective (RTO): 4 hours
+- Recovery Point Objective (RPO): 1 hour
+
+Monitoring and Alerting:
+- System monitoring: CPU, RAM, disk usage, network bandwidth
+- Application monitoring: Response times, error rates, API call success rates
+- Database monitoring: Connection pool usage, query performance, replication lag
+- Alerting tools: Prometheus + Grafana, or cloud-native solutions (AWS CloudWatch)
+- Incident response: Automated alerts via email/SMS for critical issues
+
+The hardware and software specifications are designed to balance cost-effectiveness with performance requirements. The modular architecture allows for incremental upgrades as user load increases, preventing over-provisioning in early stages while maintaining a clear scaling path for growth.
+
+Page 22
+
+---
+
+3.5 Preliminary Product Description
+
+Lumia is an intelligent, multi-asset robo-advisory platform designed to democratize sophisticated portfolio management for retail investors. The system combines advanced data analytics, portfolio optimization theory, and artificial intelligence to deliver personalized investment recommendations across equities, mutual funds, ETFs, and cryptocurrencies.
+
+3.5.1 Product Overview and Core Value Proposition
+
+Lumia addresses the fundamental challenge of portfolio construction in a multi-asset world by providing:
+
+1. Unified Multi-Asset Platform
+- Single interface for analyzing 16,000+ securities across 4 asset classes
+- Consolidated view of stocks (NSE, BSE), mutual funds, ETFs, and cryptocurrencies
+- Eliminates need for multiple platforms and fragmented decision-making
+
+2. Intelligent Asset Selection
+- Proprietary 100-point scoring system evaluating price momentum, fundamentals, sentiment, and risk
+- Top 5-8 assets selected from universe based on comprehensive quality metrics
+- Removes emotional biases and information overload from investment decisions
+
+3. Scientific Portfolio Optimization
+- Modern Portfolio Theory (MPT) implementation with mean-variance optimization
+- Maximizes Sharpe ratio while respecting user-defined risk constraints
+- Provides optimal allocation percentages and amounts for each asset
+
+4. Personalized Risk Profiling
+- Granular risk tolerance assessment (0-100 scale) with semantic labels
+- Custom portfolio construction aligned with individual risk appetite
+- Transparency in risk-return tradeoffs with visual indicators
+
+5. AI-Powered Insights
+- Conversational interface for exploring portfolio recommendations
+- Natural language understanding for diverse query formulations
+- Context-aware explanations for why specific assets were selected
+
+6. Real-Time Market Data Integration
+- Daily price updates from Yahoo Finance for accurate valuation
+- Quarterly fundamental data for equity analysis
+- News sentiment integration for market mood assessment
+- Cryptocurrency real-time pricing from CoinGecko
+
+3.5.2 Key Features and Capabilities
+
+User Input Interface:
+- Intuitive form-based input for capital amount, risk tolerance, and expected growth
+- Real-time validation with meaningful error messages
+- Responsive design adapting to desktop and tablet screens
+- Dark theme with Times New Roman font for professional appearance
+
+Portfolio Generation:
+- One-click portfolio creation based on user preferences
+- Processing time under 10 seconds for typical scenarios
+- Diversification across asset classes and sectors
+- Constraint-based optimization ensuring feasible solutions
+
+Interactive Visualizations:
+- Donut chart showing proportional allocation across selected assets
+- Horizontal bar chart for individual asset allocation amounts
+- Three gauge charts displaying risk metrics, expected returns, and Sharpe ratio
+- Box plot for return distribution and volatility visualization
+- Responsive Plotly charts with zoom, pan, and export capabilities
+
+Page 23
+
+AI Chat Assistant (LumiaAI):
+- Natural language interface for portfolio exploration
+- Supported query types:
+- Allocation queries: "How much should I invest in each stock?"
+- Best asset identification: "Which is the best performing asset?"
+- Risk analysis: "What is the risk level of my portfolio?"
+- Return projections: "What returns can I expect?"
+- Asset comparisons: "Compare the top two assets"
+- Diversification analysis: "How diversified is my portfolio?"
+- Sector breakdown: "Which sectors am I invested in?"
+- Greetings and help: Conversational onboarding
+- Context-aware responses leveraging conversation history
+- Detailed explanations including asset names, amounts, percentages, and rationales
+
+Data Management:
+- Automated daily data collection via scheduled scripts
+- Comprehensive logging of all operations for auditability
+- Database migration support for schema evolution
+- Data validation and quality checks at ingestion
+
+Analytics and Reporting:
+- Portfolio performance metrics (Sharpe ratio, volatility, expected return)
+- Asset-level attribution showing contribution to portfolio metrics
+- Historical comparison for tracking recommendation quality
+- Exportable reports for offline review (future enhancement)
+
+3.5.3 User Personas and Use Cases
+
+Persona 1: Conservative Investor (Retiree)
+- Age: 60+, retired professional
+- Capital: ₹5,00,000 - ₹20,00,000
+- Risk tolerance: Low (10-30 on scale)
+- Goal: Capital preservation with stable income
+- Use case: Seeks low-volatility portfolio with emphasis on large-cap stocks and debt mutual funds
+
+Persona 2: Moderate Growth Seeker (Mid-Career Professional)
+- Age: 35-50, established career
+- Capital: ₹2,00,000 - ₹10,00,000
+- Risk tolerance: Medium (40-60 on scale)
+- Goal: Balanced growth with controlled risk
+- Use case: Wants diversified portfolio across equities and mutual funds for retirement planning
+
+Persona 3: Aggressive Growth Investor (Young Professional)
+- Age: 25-35, early career stage
+- Capital: ₹50,000 - ₹3,00,000
+- Risk tolerance: High (70-90 on scale)
+- Goal: Maximum capital appreciation
+- Use case: Seeks high-growth stocks, sector ETFs, and cryptocurrencies for wealth building
+
+Persona 4: Crypto Enthusiast
+- Age: 20-40, tech-savvy investor
+- Capital: ₹1,00,000 - ₹5,00,000
+- Risk tolerance: High (80-100 on scale)
+- Goal: Exposure to digital assets
+- Use case: Wants scientifically allocated crypto portfolio balanced with traditional assets
+
+Page 24
+
+3.5.4 Competitive Advantages
+
+Versus Traditional Financial Advisors:
+- No human bias or conflict of interest
+- Instantaneous portfolio generation vs. days/weeks for advisor consultation
+- No advisory fees (typically 1-2% AUM charged by human advisors)
+- Transparent methodology explaining every recommendation
+- 24/7 availability through chat interface
+
+Versus Existing Robo-Advisors:
+- Multi-asset class support (most focus only on equities or mutual funds)
+- Granular risk profiling (0-100 scale vs. typical 3-5 categories)
+- Explainable AI with conversational interface (vs. black-box recommendations)
+- Comprehensive scoring incorporating sentiment analysis
+- Indian market focus with local asset classes (mutual funds, NSE/BSE stocks)
+
+Versus DIY Investment Platforms:
+- Removes need for extensive financial knowledge
+- Scientific optimization vs. ad-hoc manual selection
+- Data-driven decisions eliminating emotional biases
+- Time-saving (10 seconds vs. hours of research)
+- Continuous learning from market data
+
+3.5.5 Limitations and Disclaimers
+
+Current Limitations:
+- Recommendations based on historical data; past performance not indicative of future results
+- No real-time trade execution; users must manually execute trades
+- No tax optimization or harvesting strategies
+- Limited to assets with sufficient historical data (90+ days)
+- Requires internet connectivity for all operations
+
+Regulatory Disclaimer:
+- Lumia provides informational recommendations only, not financial advice
+- Users should consult certified financial planners for personalized advice
+- No guarantees on returns or portfolio performance
+- Users assume all investment risks
+- System does not manage or custody user funds
+
+The Lumia platform represents a significant advancement in accessible, intelligent portfolio management. By combining rigorous quantitative methods with intuitive user experience and explainable AI, Lumia empowers retail investors to make informed, data-driven investment decisions across a diverse range of asset classes.
+
+Page 25
+
+---
+
+3.6 Conceptual Models
+
+The Lumia system architecture is represented through several conceptual models that illustrate the relationships between components, data flows, and processing logic. These models provide a high-level understanding of system organization and operation.
+
+3.6.1 System Architecture Model
+
+The Lumia platform follows a three-tier architecture pattern with clear separation of concerns:
+
+Tier 1: Presentation Layer (User Interface)
+- Streamlit web application serving HTML/CSS/JavaScript
+- Interactive components for user input and visualization
+- Chat interface for AI-powered conversations
+- Responsive design adapting to screen sizes
+- Communication: HTTP/HTTPS requests to application server
+
+Tier 2: Application Layer (Business Logic)
+- Portfolio optimization engine implementing MPT algorithms
+- Asset scoring and evaluation modules
+- Data transformation and aggregation logic
+- LumiaAI conversational intelligence
+- Session state management
+- Communication: Database queries via SQLAlchemy ORM
+
+Tier 3: Data Layer (Persistence)
+- PostgreSQL relational database storing assets, prices, fundamentals, news
+- Normalized schema with referential integrity constraints
+- Indexes for query performance optimization
+- Alembic migrations for schema version control
+- Communication: SQL queries over TCP/IP connection
+
+External Integration Layer:
+- Yahoo Finance API: Stock, ETF, mutual fund data
+- NewsAPI: Financial news articles and sentiment
+- CoinGecko API: Cryptocurrency data
+- Communication: RESTful HTTP API calls with JSON responses
+
+3.6.2 Data Flow Model
+
+The data flow through the Lumia system follows a pipeline architecture:
+
+1. Data Collection Flow:
+
+- Scheduled execution (daily or on-demand)
+- Error handling and retry logic for API failures
+- Incremental updates to avoid redundant data collection
+- Transaction-based commits ensuring data consistency
+
+2. Portfolio Generation Flow:
+
+- Real-time processing triggered by user action
+- Parallel execution where possible (asset scoring)
+- Caching of intermediate results
+- Error propagation with user-friendly messages
+
+3. Chat Interaction Flow:
+
+- Stateful conversation with history tracking
+- Pattern matching for intent classification
+- Dynamic content generation based on portfolio state
+
+Page 26
+
+3.6.3 Entity-Relationship Conceptual Model
+
+The database conceptual model defines the core entities and their relationships:
+
+Entity: Asset
+- Attributes: symbol, name, assettype, sector, isactive, createdat, updatedat
+- Relationships: 1-to-Many with DailyPrice, QuarterlyFundamental, NewsArticle
+
+Entity: DailyPrice
+- Attributes: asset_id, date, open, high, low, close, volume, returns, volatility
+- Relationships: Many-to-1 with Asset
+
+Entity: QuarterlyFundamental
+- Attributes: assetid, quarterenddate, revenue, netincome, eps, peratio, debtto_equity, roe
+- Relationships: Many-to-1 with Asset
+
+Entity: NewsArticle
+- Attributes: title, publisheddate, source, url, sentimentscore, asset_link
+- Relationships: Many-to-Many with Asset (via asset_link JSON field)
+
+Entity: CollectorRun
+- Attributes: runid, collectorname, starttime, endtime, status, assets_processed, errors
+- Relationships: Independent tracking entity for monitoring
+
+3.6.4 Component Interaction Model
+
+The system comprises several interacting components:
+
+Component 1: Data Collectors
+- StocksManager, MutualFundManager, ETFManager, CryptoManager, NewsCollector
+- Responsibilities: API integration, data extraction, transformation, loading
+- Interaction: Read API data → Write to database → Log to CollectorRun
+
+Component 2: Roboadvisor Module
+- UserProfile, AssetSelector, PortfolioStrategy, Optimizer, Recommender
+- Responsibilities: User profiling, asset filtering, portfolio construction
+- Interaction: Read user input → Query database → Apply algorithms → Return results
+
+Component 3: Intelligence Module
+- LumiaAI class with intent recognition and response generation
+- Responsibilities: Natural language understanding, context management, answer formulation
+- Interaction: Receive query → Analyze intent → Access portfolio data → Generate response
+
+Component 4: UI Components
+- Streamlit pages, custom components, chart generators, style definitions
+- Responsibilities: User interaction, data visualization, session management
+- Interaction: Render UI → Capture input → Display results → Handle events
+
+Component 5: Database Layer
+- SQLAlchemy models, session management, query optimization
+- Responsibilities: Data persistence, integrity enforcement, transaction management
+- Interaction: Receive queries → Execute SQL → Return results → Commit/rollback
+
+These conceptual models provide the foundation for detailed system design and implementation. The modular, loosely-coupled architecture enables independent development and testing of components while maintaining clear interfaces for integration.
+
+Page 26
+
+---
+
+End of Chapter 3
