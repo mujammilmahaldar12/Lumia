@@ -78,16 +78,7 @@
 | 5.4 | Modifications and Improvements | 70 |
 | 5.5 | Test Cases | 71-73 |
 
-| 5.1 | Implementation Approaches | 65 |
-| 5.2 | Coding Details and Code Efficiency | 66-67 |
-| <div style="margin-left: 20px;">5.2.1</div> | <div style="margin-left: 20px;">Code Efficiency</div> | 66-67 |
-| 5.3 | Testing Approach | 68-70 |
-| <div style="margin-left: 20px;">5.3.1</div> | <div style="margin-left: 20px;">Unit Testing</div> | 68 |
-| <div style="margin-left: 20px;">5.3.2</div> | <div style="margin-left: 20px;">Integrated Testing</div> | 69 |
-| <div style="margin-left: 20px;">5.3.3</div> | <div style="margin-left: 20px;">Performance Testing</div> | 69-70 |
-| 5.4 | Modifications and Improvements | 70 |
-| 5.5 | Test Cases | 71-73 |
-create a chapter 5 on the basis oft this topics 
+ 
 </div>
 
 ---
