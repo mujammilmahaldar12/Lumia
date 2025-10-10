@@ -1,0 +1,135 @@
+@startuml Lumia_Use_Case_Diagram
+!theme amiga
+title Lumia Robo-Advisor - Use Case Diagram
+
+left to right direction
+
+actor "Individual Investor" as investor
+actor "System Administrator" as admin
+actor "Data Provider" as provider
+actor "Market Data API" as api
+
+rectangle "Lumia Robo-Advisor System" {
+    
+    package "Authentication & Profile Management" {
+        usecase "Register Account" as UC1
+        usecase "Login to System" as UC2
+        usecase "Update Profile" as UC3
+        usecase "Manage Security Settings" as UC4
+        usecase "Complete Risk Assessment" as UC5
+    }
+    
+    package "Portfolio Management" {
+        usecase "Generate Portfolio" as UC6
+        usecase "View Portfolio Details" as UC7
+        usecase "Rebalance Portfolio" as UC8
+        usecase "Set Investment Goals" as UC9
+        usecase "Configure Risk Preferences" as UC10
+        usecase "Exclude Asset Types" as UC11
+    }
+    
+    package "Market Analysis" {
+        usecase "View Asset Recommendations" as UC12
+        usecase "Analyze Market Trends" as UC13
+        usecase "Compare Asset Performance" as UC14
+        usecase "View News & Sentiment" as UC15
+        usecase "Track Portfolio Performance" as UC16
+    }
+    
+    package "Notifications & Alerts" {
+        usecase "Receive Portfolio Updates" as UC17
+        usecase "Get Market Alerts" as UC18
+        usecase "Monitor Goal Progress" as UC19
+        usecase "Configure Notification Preferences" as UC20
+    }
+    
+    package "Data Management" {
+        usecase "Collect Market Data" as UC21
+        usecase "Update Asset Prices" as UC22
+        usecase "Fetch News Articles" as UC23
+        usecase "Calculate Financial Metrics" as UC24
+        usecase "Maintain Data Quality" as UC25
+    }
+    
+    package "System Administration" {
+        usecase "Monitor System Health" as UC26
+        usecase "Manage Data Sources" as UC27
+        usecase "Configure Collectors" as UC28
+        usecase "Review System Logs" as UC29
+        usecase "Backup Database" as UC30
+    }
+    
+    package "Reporting & Analytics" {
+        usecase "Generate Performance Reports" as UC31
+        usecase "Calculate Risk Metrics" as UC32
+        usecase "Export Portfolio Data" as UC33
+        usecase "View Historical Analysis" as UC34
+    }
+}
+
+' Primary Actor Relationships
+investor --> UC1
+investor --> UC2
+investor --> UC3
+investor --> UC4
+investor --> UC5
+investor --> UC6
+investor --> UC7
+investor --> UC8
+investor --> UC9
+investor --> UC10
+investor --> UC11
+investor --> UC12
+investor --> UC13
+investor --> UC14
+investor --> UC15
+investor --> UC16
+investor --> UC17
+investor --> UC18
+investor --> UC19
+investor --> UC20
+investor --> UC31
+investor --> UC32
+investor --> UC33
+investor --> UC34
+
+' Admin Relationships
+admin --> UC26
+admin --> UC27
+admin --> UC28
+admin --> UC29
+admin --> UC30
+admin --> UC25
+
+' System Relationships
+provider --> UC21
+provider --> UC23
+api --> UC22
+api --> UC24
+
+' Include Relationships
+UC6 ..> UC5 : <<include>>
+UC6 ..> UC10 : <<include>>
+UC8 ..> UC6 : <<include>>
+UC12 ..> UC24 : <<include>>
+UC13 ..> UC22 : <<include>>
+UC15 ..> UC23 : <<include>>
+UC16 ..> UC31 : <<include>>
+UC17 ..> UC16 : <<include>>
+UC18 ..> UC13 : <<include>>
+UC19 ..> UC9 : <<include>>
+
+' Extend Relationships
+UC11 ..> UC6 : <<extend>>
+UC20 ..> UC17 : <<extend>>
+UC20 ..> UC18 : <<extend>>
+UC14 ..> UC12 : <<extend>>
+UC34 ..> UC16 : <<extend>>
+
+' System Dependencies
+UC21 ..> UC25 : <<include>>
+UC22 ..> UC25 : <<include>>
+UC23 ..> UC25 : <<include>>
+UC24 ..> UC22 : <<include>>
+
+@enduml

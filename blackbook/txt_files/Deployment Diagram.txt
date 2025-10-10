@@ -1,0 +1,107 @@
+@startuml Lumia_Deployment_Diagram
+!theme amiga
+title Lumia Robo-Advisor - Deployment Architecture
+
+!define NODE(name,desc) node name as "desc"
+!define ARTIFACT(name,desc) artifact name as "desc"
+
+NODE(UserDevice, "User Device\n(Desktop/Mobile Browser)")
+NODE(CloudInfra, "Cloud Infrastructure")
+NODE(SupabaseCloud, "Supabase Cloud Platform")
+NODE(ExternalAPIs, "External API Services")
+
+package "User Environment" {
+    NODE(WebBrowser, "Web Browser\n(Chrome, Firefox, Safari)")
+    ARTIFACT(ReactApp, "React Application\n(Built with Vite)")
+    ARTIFACT(JSBundle, "JavaScript Bundle\n(TypeScript Compiled)")
+    ARTIFACT(CSSBundle, "CSS Bundle\n(Tailwind CSS)")
+    ARTIFACT(Assets, "Static Assets\n(Images, Fonts)")
+}
+
+package "Production Environment" {
+    NODE(WebServer, "Web Server\n(Nginx/Apache)")
+    NODE(AppServer, "Application Server\n(Python WSGI)")
+    ARTIFACT(FlaskApp, "Flask Application\n(api_server.py)")
+    ARTIFACT(RoboAdvisorEngine, "RoboAdvisor Module\n(Portfolio Logic)")
+    ARTIFACT(DataCollectors, "Data Collectors\n(Background Jobs)")
+    ARTIFACT(DatabaseModels, "Database Models\n(SQLAlchemy ORM)")
+}
+
+package "Supabase Infrastructure" {
+    NODE(PostgresDB, "PostgreSQL Database\n(Managed Instance)")
+    NODE(AuthService, "Authentication Service\n(Supabase Auth)")
+    NODE(RealtimeService, "Realtime Service\n(WebSocket Server)")
+    NODE(EdgeFunctions, "Edge Functions\n(Serverless Computing)")
+    NODE(Storage, "Storage Service\n(File Management)")
+}
+
+package "Data Sources" {
+    NODE(YahooFinance, "Yahoo Finance API\n(Stock Data)")
+    NODE(AlphaVantage, "Alpha Vantage API\n(Financial Data)")
+    NODE(CoinGecko, "CoinGecko API\n(Crypto Data)")
+    NODE(NewsAPIs, "News APIs\n(Financial News)")
+    NODE(MFDataProviders, "Mutual Fund Providers\n(Indian MF Data)")
+}
+
+package "Monitoring & Logging" {
+    NODE(LoggingService, "Logging Service\n(Application Logs)")
+    NODE(MonitoringService, "Monitoring Service\n(Performance Metrics)")
+    NODE(AlertingService, "Alerting Service\n(System Alerts)")
+}
+
+' User Device Connections
+UserDevice --> WebBrowser
+WebBrowser --> ReactApp
+WebBrowser --> JSBundle
+WebBrowser --> CSSBundle
+WebBrowser --> Assets
+
+' Web Browser to Production
+WebBrowser --> WebServer : "HTTPS"
+WebServer --> AppServer : "HTTP/WSGI"
+
+' Production Environment Internal
+AppServer --> FlaskApp
+FlaskApp --> RoboAdvisorEngine
+FlaskApp --> DatabaseModels
+AppServer --> DataCollectors
+
+' Production to Supabase
+FlaskApp --> PostgresDB : "PostgreSQL Connection"
+FlaskApp --> AuthService : "Authentication API"
+ReactApp --> RealtimeService : "WebSocket"
+DataCollectors --> PostgresDB : "Data Ingestion"
+
+' Data Collection Connections
+DataCollectors --> YahooFinance : "REST API"
+DataCollectors --> AlphaVantage : "REST API"
+DataCollectors --> CoinGecko : "REST API"
+DataCollectors --> NewsAPIs : "REST API"
+DataCollectors --> MFDataProviders : "Web Scraping/API"
+
+' Monitoring Connections
+FlaskApp --> LoggingService : "Log Stream"
+AppServer --> MonitoringService : "Metrics"
+MonitoringService --> AlertingService : "Alerts"
+
+' Security Connections
+ReactApp --> AuthService : "JWT Token Validation"
+FlaskApp --> AuthService : "User Authentication"
+
+' Database Connections
+PostgresDB --> Storage : "File References"
+AuthService --> PostgresDB : "User Data"
+RealtimeService --> PostgresDB : "Change Streams"
+
+' Deployment Specifications
+note right of ReactApp : "Build: npm run build\nDeploy: Static Hosting\nCDN: Global Distribution"
+
+note right of FlaskApp : "Runtime: Python 3.10+\nServer: Gunicorn\nScale: Auto-scaling"
+
+note right of PostgresDB : "Version: PostgreSQL 15\nBackup: Automated\nReplication: Multi-region"
+
+note right of DataCollectors : "Schedule: Cron Jobs\nRetry: Exponential Backoff\nMonitoring: Health Checks"
+
+note bottom of ExternalAPIs : "Rate Limiting: API Keys\nFailover: Multiple Providers\nCaching: Redis Cache"
+
+@enduml

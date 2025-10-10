@@ -2,27 +2,27 @@ CHAPTER 2: SURVEY OF TECHNOLOGIES
 
 2.1 Technology Overview
 
-The Lumia Robo-Advisor represents a convergence of modern web development technologies, financial computing frameworks, and cloud-native infrastructure. The platform's architecture is built upon a carefully selected technology stack that balances performance, scalability, developer experience, and maintainability. This comprehensive survey examines the technologies that power different aspects of the system, from frontend user interfaces to backend financial algorithms, database management, and deployment infrastructure.
+The Lumia Robo-Advisor represents a sophisticated hybrid financial technology platform that combines modern web development frameworks, advanced Python-based financial computing, and streamlined user interfaces. The platform's architecture is built upon a carefully selected technology stack that balances computational efficiency, rapid development capabilities, and user experience optimization. This comprehensive survey examines the technologies that power different aspects of the system, from interactive web interfaces to backend financial algorithms, database management, and data processing infrastructure.
 
-The technology selection process was guided by several key criteria: industry standards and best practices in modern web development, performance requirements for real-time financial data processing, scalability needs to support growing user bases and expanding data sets, security considerations for handling sensitive financial information, developer productivity and ecosystem maturity, and long-term maintainability and community support.
+The technology selection process was guided by several key criteria: proven performance in financial computing applications, rapid prototyping and deployment capabilities, robust data processing requirements for large financial datasets, developer productivity and ecosystem maturity, integration capabilities with financial data sources, and maintainability for evolving financial models.
 
-The platform employs a hybrid architecture that combines the flexibility of modern JavaScript frameworks with the computational power of Python for financial analysis. This approach allows for rapid frontend development and responsive user interfaces while leveraging Python's extensive ecosystem of scientific computing and financial analysis libraries. The architecture is designed to be modular, with clear separation of concerns between different system components.
+The platform employs a multi-interface architecture that combines Python-based computational backends with both traditional React web interfaces and modern Streamlit applications for different use cases. This hybrid approach enables sophisticated financial analysis through Python's scientific computing ecosystem while providing flexible user interface options ranging from interactive web dashboards to analytical interfaces for professional portfolio management.
 
-Frontend development utilizes React 18 as the core framework, enhanced with TypeScript for type safety and developer productivity. The user interface is built using modern component libraries and styling frameworks that provide professional-grade design systems. The frontend architecture emphasizes reusability, maintainability, and performance optimization through code splitting and efficient bundle management.
+The primary user interface is built using Streamlit, a Python-native framework that enables rapid development of interactive data applications. This choice allows for seamless integration between the user interface and backend financial computations, eliminating the traditional frontend-backend separation for analytical workflows. Additionally, modern React 18 components with TypeScript provide traditional web application capabilities where needed.
 
-Backend services are implemented using Flask, a lightweight but powerful Python web framework that provides the flexibility needed for financial data processing and API development. The backend architecture incorporates SQLAlchemy ORM for database interactions, enabling complex financial data modeling while maintaining performance and security. The system integrates with multiple external APIs for real-time market data collection and processing.
+Backend services are implemented using a hybrid Flask/FastAPI architecture, leveraging Flask for core API endpoints and FastAPI for high-performance data processing tasks. The backend architecture incorporates SQLAlchemy ORM for database interactions, enabling complex financial data modeling while maintaining performance and security. The system integrates with multiple external APIs for real-time market data collection and processing through specialized collector modules.
 
-Database and cloud infrastructure leverage PostgreSQL for robust data storage with Supabase providing cloud-native features including authentication, real-time subscriptions, and scalable hosting. This combination ensures data integrity, security, and global accessibility while maintaining cost-effectiveness and ease of deployment.
+Database infrastructure utilizes PostgreSQL for robust financial data storage with comprehensive data modeling for assets, daily prices, quarterly fundamentals, news sentiment, and portfolio analytics. The database design supports efficient querying of large financial datasets and maintains data integrity for critical financial calculations.
 
 2.1.1 Frontend Technologies
 
 **React 18 Framework**
-React 18 serves as the foundation of the Lumia frontend, providing a component-based architecture that enables the development of complex, interactive user interfaces. React 18 introduces several performance improvements including automatic batching, concurrent features, and Suspense enhancements that are particularly beneficial for financial applications requiring real-time data updates. The framework's virtual DOM and efficient reconciliation algorithm ensure smooth user interactions even when handling large datasets of financial information.
+React 18 serves as the foundation for one of the Lumia frontend implementations, specifically the lumia-glow-dash interface, providing a component-based architecture that enables the development of complex, interactive user interfaces. React 18 introduces several performance improvements including automatic batching, concurrent features, and Suspense enhancements that are particularly beneficial for financial applications requiring real-time data updates. The framework's virtual DOM and efficient reconciliation algorithm ensure smooth user interactions even when handling large datasets of financial information.
 
 The choice of React 18 was motivated by its mature ecosystem, excellent TypeScript integration, and strong community support. React's component-based architecture aligns perfectly with the modular design requirements of a financial application, where complex features like portfolio visualization, risk assessment forms, and real-time market data displays can be developed as independent, reusable components.
 
 **TypeScript Integration**
-TypeScript provides static type checking and enhanced developer experience throughout the frontend codebase. In a financial application where data accuracy and type safety are paramount, TypeScript's compile-time error detection prevents many runtime issues that could affect user experience or data integrity. The type system enables confident refactoring, better IDE support with intelligent autocomplete and navigation, and serves as living documentation for complex financial data structures.
+TypeScript provides static type checking and enhanced developer experience throughout the React frontend codebase. In a financial application where data accuracy and type safety are paramount, TypeScript's compile-time error detection prevents many runtime issues that could affect user experience or data integrity. The type system enables confident refactoring, better IDE support with intelligent autocomplete and navigation, and serves as living documentation for complex financial data structures.
 
 TypeScript's interface definitions are particularly valuable for modeling financial entities such as assets, portfolios, user profiles, and market data. The type system ensures consistency between frontend components and backend API responses, reducing the likelihood of data-related bugs in production.
 
@@ -41,42 +41,57 @@ Tailwind CSS provides utility-first styling that enables rapid UI development an
 
 For financial applications, Tailwind's color system and spacing utilities are particularly valuable for creating clear visual hierarchies that help users understand complex financial data. The framework's purging capabilities ensure that only used styles are included in production builds, maintaining optimal performance.
 
-**Additional Frontend Libraries**
-The frontend stack includes several specialized libraries that enhance the user experience and development efficiency. Lucide React provides a comprehensive icon library with financial and interface icons that maintain visual consistency throughout the application. React Hook Form simplifies form management and validation, which is essential for user profile creation, risk assessment questionnaires, and portfolio configuration forms.
+**Streamlit for Rapid Prototyping and Analytics**
+Streamlit serves as the primary interface for the Lumia platform, providing a Python-native framework that enables rapid development of interactive data applications. This choice is particularly strategic for financial applications as it allows seamless integration between the user interface and backend financial computations, eliminating the traditional frontend-backend separation for analytical workflows.
 
-React Query (TanStack Query) manages server state and API interactions, providing caching, background updates, and optimistic updates that are crucial for financial applications where data freshness and availability are important. Date-fns handles date manipulation and formatting for financial timelines and reporting features.
+Streamlit's approach to building data applications is particularly well-suited for financial analytics, where the ability to quickly prototype and iterate on complex financial calculations and visualizations is crucial. The framework's reactive programming model automatically updates the interface when underlying data changes, making it ideal for real-time portfolio monitoring and market data visualization.
+
+**Additional Frontend Libraries**
+The React frontend stack includes several specialized libraries that enhance the user experience and development efficiency. Lucide React provides a comprehensive icon library with financial and interface icons that maintain visual consistency throughout the application. React Hook Form simplifies form management and validation, which is essential for user profile creation, risk assessment questionnaires, and portfolio configuration forms.
+
+TanStack Query (React Query) manages server state and API interactions, providing caching, background updates, and optimistic updates that are crucial for financial applications where data freshness and availability are important. Date-fns handles date manipulation and formatting for financial timelines and reporting features.
 
 2.1.2 Backend Technologies
 
-**Flask Web Framework**
-Flask serves as the core web framework for the Lumia backend, providing a lightweight yet powerful foundation for API development. Flask's minimalist approach allows for maximum flexibility in architectural decisions, which is particularly valuable for financial applications that may need to integrate with various external data sources and computational libraries. The framework's simplicity makes it easy to understand, maintain, and extend as the application grows.
+**Flask Web Framework with FastAPI Integration**
+Flask serves as the core web framework for the Lumia backend through api_server.py, providing a lightweight yet powerful foundation for API development. Flask's minimalist approach allows for maximum flexibility in architectural decisions, which is particularly valuable for financial applications that may need to integrate with various external data sources and computational libraries. The framework's simplicity makes it easy to understand, maintain, and extend as the application grows.
+
+The system incorporates FastAPI capabilities for high-performance data processing tasks, as evidenced in the requirements.txt file. This hybrid approach leverages Flask's simplicity for core endpoints while utilizing FastAPI's automatic OpenAPI documentation generation and high-performance async capabilities for data-intensive operations.
 
 Flask's extensive ecosystem includes numerous extensions for common functionality such as CORS handling, request validation, and authentication integration. The framework's WSGI compatibility ensures easy deployment across various hosting platforms and environments. Flask's request handling and routing capabilities are well-suited for RESTful API design, enabling clean separation between frontend and backend concerns.
 
-**SQLAlchemy ORM**
+**SQLAlchemy ORM with PostgreSQL**
 SQLAlchemy provides sophisticated object-relational mapping capabilities that bridge the gap between Python objects and database tables. For financial applications, SQLAlchemy's advanced features such as relationship modeling, query optimization, and transaction management are essential for maintaining data integrity and performance. The ORM's expression language enables complex financial queries while maintaining security against SQL injection attacks.
 
-SQLAlchemy's declarative base allows for clear modeling of financial entities such as assets, portfolios, transactions, and user profiles. The ORM's relationship capabilities enable efficient querying of related data, such as retrieving all assets in a portfolio along with their current prices and historical performance data. SQLAlchemy's migration support through Alembic ensures that database schema changes can be managed safely in production environments.
+The implementation utilizes PostgreSQL as the primary database system, as configured in database.py, providing enterprise-grade reliability and ACID compliance essential for financial data. SQLAlchemy's declarative base allows for clear modeling of financial entities including assets, daily prices, quarterly fundamentals, news articles, and collector runs through the comprehensive models package.
 
-**Python Financial Computing Stack**
+Alembic provides database migration management that ensures consistent schema evolution across development, testing, and production environments. The migration system enables collaborative development by ensuring that all team members work with consistent database schemas while providing version-controlled database changes.
+
+**Python Scientific Computing and Financial Analysis Stack**
 The backend leverages Python's extensive ecosystem of scientific computing and financial analysis libraries. NumPy provides the foundation for numerical computations, enabling efficient mathematical operations on large datasets of financial data. Pandas offers powerful data manipulation and analysis capabilities that are essential for portfolio construction, risk analysis, and performance calculations.
 
-SciPy extends NumPy with additional mathematical algorithms and optimization functions that are particularly useful for portfolio optimization problems. The scipy.optimize module is used for implementing Modern Portfolio Theory calculations and constraint-based optimization. These libraries provide the computational backbone for the platform's financial intelligence.
+The requirements.txt file demonstrates the use of advanced libraries including scikit-learn for machine learning applications, transformers and torch for natural language processing of financial news, and specialized financial computing libraries. These libraries provide the computational backbone for the platform's financial intelligence and portfolio optimization algorithms.
 
-**Financial Analysis Libraries**
-The system incorporates specialized libraries for financial calculations and analysis. While not relying on proprietary financial libraries, the implementation leverages Python's mathematical capabilities to implement Modern Portfolio Theory, risk metrics calculation, and portfolio optimization algorithms. This approach provides full control over financial calculations while maintaining transparency and customizability.
+The system implements Modern Portfolio Theory calculations using scipy.optimize for constraint-based optimization and numerical methods. The financial calculation engine supports portfolio return and risk calculations, Sharpe ratio optimization, Value at Risk (VaR) estimation, and correlation analysis built using fundamental mathematical principles.
 
-The financial analysis capabilities include portfolio return and risk calculations, Sharpe ratio optimization, Value at Risk (VaR) estimation, and correlation analysis. These implementations are built using fundamental mathematical principles combined with Python's scientific computing stack.
+**News Collection and Data Processing Infrastructure**
+The platform includes comprehensive data collection modules that integrate with various financial data providers through the news_collector package. The system integrates with multiple news APIs including NewsAPI, Finnhub, Polygon, CryptoPanic, and Alpha Vantage, providing redundant data sources for reliable market information.
 
-**API Integration and Data Collection**
-The backend architecture includes comprehensive data collection modules that integrate with various financial data providers. The collectors package includes specialized modules for different asset classes: stocks_manager.py for equity data, mutual_fund_manager.py for mutual fund information, etf_manager.py for ETF data, and crypto_manager.py for cryptocurrency prices.
+The collectors package includes specialized modules for different asset classes: stocks_manager.py for equity data, mutual_fund_manager.py for mutual fund information, etf_manager.py for ETF data, crypto_manager.py for cryptocurrency prices, and indian_mf_collector.py for Indian mutual fund data. The master_collector.py orchestrates all data collection processes, ensuring efficient and reliable data synchronization.
 
-The master_collector.py orchestrates all data collection processes, ensuring efficient and reliable data synchronization. The system uses requests library for HTTP API integration and implements robust error handling and retry mechanisms to ensure data availability. Beautiful Soup and lxml are used for web scraping when API access is not available.
+The system uses requests library for HTTP API integration and implements Beautiful Soup and lxml for web scraping when API access is not available. DuckDuckGo Search provides additional news fetching capabilities without requiring API keys, ensuring data availability and reducing dependency on paid services.
+
+**Machine Learning and Natural Language Processing**
+The backend incorporates advanced machine learning capabilities for enhanced financial analysis and sentiment processing. The transformers library enables sophisticated text analysis for financial news sentiment classification and topic modeling. NLTK provides additional text processing capabilities for financial document analysis and keyword extraction.
+
+The system includes PyTorch for deep learning applications and specialized financial sentiment analysis using FinBERT models for analyzing market sentiment from news articles and social media. These advanced analytics capabilities enhance the traditional portfolio optimization approach with additional market intelligence and sentiment-driven insights.
+
+Scikit-learn supports various machine learning algorithms for pattern recognition, risk assessment, and predictive modeling. The ML infrastructure enables the platform to adapt and improve recommendations based on market conditions and user feedback patterns.
 
 **Asynchronous Processing and Scheduling**
-The backend incorporates asynchronous processing capabilities for handling concurrent data collection and processing tasks. The APScheduler library enables scheduled data collection tasks that ensure market data remains current without manual intervention. This automation is crucial for maintaining accurate portfolio valuations and recommendations.
+The backend incorporates asynchronous processing capabilities through APScheduler for handling concurrent data collection and processing tasks. The scheduling system enables automated market data updates, ensuring portfolio valuations and recommendations remain current without manual intervention.
 
-The scheduling system is designed to handle different update frequencies for various asset classes and data types. Real-time data updates are balanced with API rate limits and resource constraints to ensure efficient operation.
+The scheduling infrastructure is designed to handle different update frequencies for various asset classes and data types. Real-time data updates are balanced with API rate limits and resource constraints to ensure efficient operation while maintaining data freshness for time-sensitive financial decisions.
 
 2.1.3 Database and Cloud Infrastructure
 
@@ -137,6 +152,20 @@ The core financial calculation engine implements Modern Portfolio Theory princip
 Portfolio optimization uses Mean-Variance Optimization techniques implemented with SciPy's optimization functions. The optimization process considers user risk tolerance, investment horizon, and return expectations to generate optimal asset allocations. Constraint handling ensures that portfolios meet practical requirements such as minimum position sizes and asset class limits.
 
 Risk calculations include standard deviation, Value at Risk (VaR), and correlation analysis that help users understand portfolio characteristics. Performance metrics include Sharpe ratio, alpha, beta, and benchmark comparisons that provide comprehensive portfolio evaluation.
+
+**Streamlit Analytics Interface**
+Streamlit serves as the primary analytics and user interface platform, enabling rapid development of interactive financial applications. The streamlit_app.py implementation provides professional portfolio management capabilities with real-time asset analysis, comprehensive screener functionality, and interactive portfolio builder tools.
+
+The Streamlit interface integrates directly with the database and recommendation engine, providing seamless data flow between backend calculations and user interface. This integration eliminates the traditional API layer complexity for analytical workflows, enabling rapid prototyping and deployment of financial analysis tools.
+
+Interactive components include professional asset screeners with filtering capabilities, portfolio builders with risk assessment tools, and comprehensive visualization dashboards using Plotly for financial charts and metrics display.
+
+**Plotly Visualization System**
+Plotly provides sophisticated charting and visualization capabilities specifically designed for financial data presentation. The implementation includes interactive charts for price trends, portfolio allocation visualizations, performance comparison charts, and risk-return scatter plots.
+
+The visualization system supports real-time updates, enabling dynamic charts that reflect current market conditions and portfolio changes. Interactive features include zooming, filtering, drill-down capabilities, and hover tooltips that provide detailed information without cluttering the interface.
+
+Chart customization options ensure consistent branding and optimal readability for financial data. The system includes responsive design principles that adapt visualizations to different screen sizes while maintaining data clarity and precision.
 
 **Advanced Analytics and Machine Learning**
 The platform incorporates machine learning capabilities for enhanced financial analysis and user personalization. Natural language processing (NLP) techniques analyze financial news and social media sentiment to provide additional market insights.
@@ -257,11 +286,11 @@ Keyboard navigation support enables users to access all functionality without re
 Screen reader compatibility includes proper semantic markup, ARIA labels, and descriptive text that enable assistive technologies to convey financial information effectively. Color contrast ratios meet accessibility standards while maintaining visual hierarchy for financial data presentation.
 
 **Interactive Data Visualization**
-Recharts provides sophisticated charting capabilities that transform complex financial data into intuitive visual representations. The library supports various chart types including line charts for price trends, pie charts for portfolio allocation, and bar charts for performance comparisons.
+Plotly provides sophisticated charting capabilities that transform complex financial data into intuitive visual representations. The library supports various chart types including line charts for price trends, pie charts for portfolio allocation, bar charts for performance comparisons, and advanced financial visualizations such as candlestick charts and correlation heatmaps.
 
-Interactive charting features enable users to explore their financial data through zooming, filtering, and drill-down capabilities. These interactions help users understand portfolio performance, risk characteristics, and market trends without requiring extensive financial expertise.
+Interactive charting features enable users to explore their financial data through zooming, filtering, and drill-down capabilities. These interactions help users understand portfolio performance, risk characteristics, and market trends without requiring extensive financial expertise. Plotly's event handling system allows for custom interactions and real-time data updates.
 
-Real-time chart updates reflect current market conditions and portfolio changes, providing users with immediate visual feedback on their investment decisions. The charting system includes responsive design that adapts to different screen sizes while maintaining data clarity.
+Real-time chart updates reflect current market conditions and portfolio changes, providing users with immediate visual feedback on their investment decisions. The charting system includes responsive design that adapts to different screen sizes while maintaining data clarity and precision essential for financial decision-making.
 
 **Form Design and User Input**
 React Hook Form provides sophisticated form management capabilities that enhance user experience while maintaining data accuracy. The form system includes real-time validation that provides immediate feedback on user inputs, reducing errors and improving completion rates.

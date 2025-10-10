@@ -1,0 +1,199 @@
+@startuml Lumia_Database_Schema
+!theme amiga
+title Lumia Robo-Advisor - Database Schema Design
+
+!define TABLE(name,desc) class name as "desc" << (T,#FFAAAA) >>
+!define PRIMARY_KEY(x) <b>x</b>
+!define FOREIGN_KEY(x) <i>x</i>
+!define NOT_NULL(x) x*
+
+TABLE(assets, "Assets")
+{
+  PRIMARY_KEY(id) : INTEGER
+  NOT_NULL(symbol) : VARCHAR(50) {unique}
+  NOT_NULL(name) : VARCHAR(500)
+  NOT_NULL(type) : VARCHAR(50)
+  subtype : VARCHAR(100)
+  exchange : VARCHAR(100)
+  country : VARCHAR(50)
+  currency : VARCHAR(10) = 'USD'
+  sector : VARCHAR(100)
+  industry : VARCHAR(100)
+  market_cap : BIGINT
+  total_assets : BIGINT
+  expense_ratio : FLOAT
+  dividend_yield : FLOAT
+  is_active : BOOLEAN = TRUE
+  listing_date : TIMESTAMP
+  delisting_date : TIMESTAMP
+  description : TEXT
+  website : VARCHAR(500)
+  isin : VARCHAR(20)
+  cusip : VARCHAR(20)
+  created_at : TIMESTAMP = NOW()
+  updated_at : TIMESTAMP = NOW()
+}
+
+TABLE(daily_prices, "Daily Prices")
+{
+  PRIMARY_KEY(id) : INTEGER
+  FOREIGN_KEY(asset_id) : INTEGER
+  NOT_NULL(date) : DATE
+  NOT_NULL(open) : FLOAT
+  NOT_NULL(high) : FLOAT
+  NOT_NULL(low) : FLOAT
+  NOT_NULL(close) : FLOAT
+  volume : BIGINT
+  adjusted_close : FLOAT
+  currency : VARCHAR(10) = 'USD'
+  created_at : TIMESTAMP = NOW()
+}
+
+TABLE(quarterly_fundamentals, "Quarterly Fundamentals")
+{
+  PRIMARY_KEY(id) : INTEGER
+  FOREIGN_KEY(asset_id) : INTEGER
+  NOT_NULL(quarter) : VARCHAR(10)
+  NOT_NULL(year) : INTEGER
+  revenue : BIGINT
+  net_income : BIGINT
+  total_assets : BIGINT
+  total_debt : BIGINT
+  shareholders_equity : BIGINT
+  operating_cash_flow : BIGINT
+  free_cash_flow : BIGINT
+  market_cap : BIGINT
+  pe_ratio : FLOAT
+  pb_ratio : FLOAT
+  ps_ratio : FLOAT
+  roe : FLOAT
+  roa : FLOAT
+  debt_to_equity : FLOAT
+  current_ratio : FLOAT
+  quick_ratio : FLOAT
+  gross_margin : FLOAT
+  operating_margin : FLOAT
+  net_margin : FLOAT
+  created_at : TIMESTAMP = NOW()
+}
+
+TABLE(news_articles, "News Articles")
+{
+  PRIMARY_KEY(id) : INTEGER
+  FOREIGN_KEY(asset_id) : INTEGER
+  NOT_NULL(title) : VARCHAR(1000)
+  content : TEXT
+  NOT_NULL(source) : VARCHAR(200)
+  NOT_NULL(published_at) : TIMESTAMP
+  sentiment_score : FLOAT
+  asset_link : VARCHAR(500)
+  category : VARCHAR(100)
+  author : VARCHAR(200)
+  url : VARCHAR(1000) {unique}
+  created_at : TIMESTAMP = NOW()
+}
+
+TABLE(collector_runs, "Collector Runs")
+{
+  PRIMARY_KEY(id) : INTEGER
+  NOT_NULL(collector_name) : VARCHAR(100)
+  NOT_NULL(run_date) : DATE
+  NOT_NULL(status) : VARCHAR(50)
+  records_processed : INTEGER = 0
+  errors_count : INTEGER = 0
+  duration_seconds : INTEGER
+  log_details : TEXT
+  created_at : TIMESTAMP = NOW()
+}
+
+TABLE(user_portfolios, "User Portfolios")
+{
+  PRIMARY_KEY(id) : INTEGER
+  NOT_NULL(user_id) : VARCHAR(100)
+  NOT_NULL(portfolio_name) : VARCHAR(200)
+  NOT_NULL(capital) : FLOAT
+  NOT_NULL(risk_score) : INTEGER
+  NOT_NULL(risk_type) : VARCHAR(50)
+  NOT_NULL(investment_horizon) : INTEGER
+  expected_return : FLOAT
+  exclusions : TEXT
+  portfolio_data : JSON
+  metrics_data : JSON
+  is_active : BOOLEAN = TRUE
+  created_at : TIMESTAMP = NOW()
+  updated_at : TIMESTAMP = NOW()
+}
+
+TABLE(portfolio_holdings, "Portfolio Holdings")
+{
+  PRIMARY_KEY(id) : INTEGER
+  FOREIGN_KEY(portfolio_id) : INTEGER
+  FOREIGN_KEY(asset_id) : INTEGER
+  NOT_NULL(allocation_percentage) : FLOAT
+  NOT_NULL(allocation_amount) : FLOAT
+  asset_score : FLOAT
+  created_at : TIMESTAMP = NOW()
+}
+
+TABLE(rebalancing_logs, "Rebalancing Logs")
+{
+  PRIMARY_KEY(id) : INTEGER
+  FOREIGN_KEY(portfolio_id) : INTEGER
+  NOT_NULL(rebalance_date) : TIMESTAMP
+  NOT_NULL(reason) : VARCHAR(500)
+  old_allocation : JSON
+  new_allocation : JSON
+  performance_impact : FLOAT
+  created_at : TIMESTAMP = NOW()
+}
+
+TABLE(system_notifications, "System Notifications")
+{
+  PRIMARY_KEY(id) : INTEGER
+  NOT_NULL(user_id) : VARCHAR(100)
+  NOT_NULL(notification_type) : VARCHAR(100)
+  NOT_NULL(title) : VARCHAR(500)
+  NOT_NULL(message) : TEXT
+  is_read : BOOLEAN = FALSE
+  priority : VARCHAR(20) = 'medium'
+  related_portfolio_id : INTEGER
+  created_at : TIMESTAMP = NOW()
+}
+
+' Relationships
+assets ||--o{ daily_prices : "asset_id"
+assets ||--o{ quarterly_fundamentals : "asset_id"
+assets ||--o{ news_articles : "asset_id"
+assets ||--o{ portfolio_holdings : "asset_id"
+
+user_portfolios ||--o{ portfolio_holdings : "portfolio_id"
+user_portfolios ||--o{ rebalancing_logs : "portfolio_id"
+user_portfolios ||--o{ system_notifications : "related_portfolio_id"
+
+' Indexes
+note top of assets : "Indexes:\n- symbol (unique)\n- type, country\n- sector, industry\n- is_active"
+
+note top of daily_prices : "Indexes:\n- asset_id, date (unique)\n- date\n- asset_id"
+
+note top of quarterly_fundamentals : "Indexes:\n- asset_id, quarter, year (unique)\n- year, quarter"
+
+note top of news_articles : "Indexes:\n- asset_id, published_at\n- url (unique)\n- published_at"
+
+note top of collector_runs : "Indexes:\n- collector_name, run_date\n- status, run_date"
+
+note top of user_portfolios : "Indexes:\n- user_id\n- is_active\n- created_at"
+
+note top of portfolio_holdings : "Indexes:\n- portfolio_id\n- asset_id"
+
+' Constraints
+note right of assets : "Constraints:\n- type IN ('stock', 'etf', 'mutual_fund', 'crypto', 'bond')\n- currency IN ('USD', 'INR', 'EUR', 'GBP')\n- country LENGTH >= 2"
+
+note right of daily_prices : "Constraints:\n- high >= low\n- high >= open, close\n- low <= open, close\n- volume >= 0"
+
+note right of quarterly_fundamentals : "Constraints:\n- quarter IN ('Q1', 'Q2', 'Q3', 'Q4')\n- year >= 1900\n- pe_ratio, pb_ratio > 0"
+
+note right of user_portfolios : "Constraints:\n- capital > 0\n- risk_score BETWEEN 0 AND 100\n- investment_horizon > 0\n- risk_type IN ('conservative', 'moderate', 'aggressive', 'very_aggressive')"
+
+note right of portfolio_holdings : "Constraints:\n- allocation_percentage BETWEEN 0 AND 1\n- allocation_amount >= 0"
+
+@enduml

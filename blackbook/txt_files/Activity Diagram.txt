@@ -1,0 +1,132 @@
+@startuml Lumia_Activity_Diagram
+!theme amiga
+title Lumia Robo-Advisor - Portfolio Generation Activity Flow
+
+start
+
+:User accesses Lumia Dashboard;
+
+if (User authenticated?) then (no)
+    :Redirect to Login;
+    :Enter credentials;
+    :Validate with Supabase Auth;
+    if (Credentials valid?) then (no)
+        :Show error message;
+        stop
+    endif
+endif
+
+:Display Dashboard;
+:User clicks "Generate Portfolio";
+
+:Load Risk Assessment Form;
+:User completes questionnaire;
+note right
+    - Investment capital
+    - Risk tolerance questions
+    - Investment horizon
+    - Asset exclusions
+    - Investment goals
+end note
+
+:Validate form data;
+if (Form valid?) then (no)
+    :Show validation errors;
+    :Return to form;
+    stop
+endif
+
+:Create UserProfile object;
+:Calculate risk score;
+:Determine risk type;
+
+partition "Portfolio Generation Process" {
+    :Get strategic allocation;
+    note right: Based on risk type and investment horizon
+    
+    :Initialize asset selection;
+    
+    fork
+        :Query stock assets;
+        :Calculate stock scores;
+        :Apply sector diversification;
+    fork again
+        :Query ETF assets;
+        :Calculate ETF scores;
+        :Filter by expense ratio;
+    fork again
+        :Query mutual fund assets;
+        :Calculate MF scores;
+        :Apply fund type filters;
+    fork again
+        :Query crypto assets;
+        :Calculate crypto scores;
+        :Apply volatility filters;
+    end fork
+    
+    :Combine selected assets;
+    
+    if (Sufficient assets found?) then (no)
+        :Use fallback demo data;
+        :Set warning flag;
+    endif
+    
+    :Calculate portfolio weights;
+    :Apply Modern Portfolio Theory;
+    :Optimize risk-return ratio;
+    
+    :Calculate portfolio metrics;
+    note right
+        - Expected return
+        - Expected risk
+        - Sharpe ratio
+        - Volatility
+    end note
+    
+    :Distribute capital allocation;
+    :Generate investment summary;
+}
+
+:Prepare portfolio response;
+:Return to frontend;
+
+:Display portfolio results;
+note right
+    - Asset allocation chart
+    - Individual recommendations
+    - Performance metrics
+    - Investment reasoning
+end note
+
+fork
+    :Show portfolio visualization;
+fork again
+    :Display asset breakdown;
+fork again
+    :Show risk analysis;
+fork again
+    :Generate notifications;
+end fork
+
+if (User satisfied with portfolio?) then (yes)
+    :Save portfolio to database;
+    :Set up monitoring alerts;
+    :Schedule rebalancing;
+else
+    :User adjusts preferences;
+    :Regenerate portfolio;
+endif
+
+:Portfolio successfully created;
+
+stop
+
+note bottom
+    Background Processes:
+    - Data collectors update prices
+    - News sentiment analysis
+    - Portfolio performance tracking
+    - Automated rebalancing alerts
+end note
+
+@enduml

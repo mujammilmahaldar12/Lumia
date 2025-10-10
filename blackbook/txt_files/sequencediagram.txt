@@ -1,0 +1,115 @@
+@startuml Lumia_Sequence_Diagram
+!theme amiga
+title Lumia Robo-Advisor - Portfolio Generation Sequence
+
+actor "Investor" as user
+participant "React Frontend" as frontend
+participant "Flask API Server" as api
+participant "Recommender" as recommender
+participant "User Profile" as profile
+participant "Asset Selector" as selector
+participant "Portfolio Strategy" as strategy
+participant "Optimizer" as optimizer
+participant "Database" as db
+participant "Data Collectors" as collectors
+
+== Authentication & Profile Setup ==
+user -> frontend: Access Lumia Dashboard
+frontend -> api: GET /health
+api -> frontend: System Status OK
+
+user -> frontend: Complete Risk Assessment
+frontend -> frontend: Validate Questionnaire
+frontend -> profile: Create UserProfile
+profile -> profile: Calculate Risk Metrics
+profile -> frontend: Profile Created
+
+== Portfolio Generation Request ==
+user -> frontend: Click "Generate Portfolio"
+frontend -> api: POST /generate_portfolio
+note right: {capital, risk_score, years, exclusions}
+
+api -> recommender: generate_portfolio(profile_data)
+
+== Risk Assessment & Strategy Selection ==
+recommender -> profile: UserProfile.from_dict()
+profile -> profile: __post_init__()
+profile -> strategy: get_strategic_allocation(risk_type)
+strategy -> recommender: Return allocation percentages
+
+== Asset Selection Process ==
+recommender -> selector: select_top_assets(asset_type, criteria)
+
+loop For each asset type (stocks, etf, mutual_funds, crypto)
+    selector -> db: Query assets by type and filters
+    db -> selector: Return filtered assets
+    selector -> selector: calculate_asset_score(asset)
+    selector -> selector: apply_sector_diversification()
+end
+
+selector -> recommender: Return selected assets
+
+== Portfolio Optimization ==
+recommender -> optimizer: calculate_portfolio_metrics(weights, returns)
+optimizer -> optimizer: Modern Portfolio Theory calculations
+optimizer -> recommender: Return risk/return metrics
+
+== Portfolio Construction ==
+recommender -> recommender: distribute_capital_allocation()
+recommender -> recommender: generate_summary(profile, portfolio)
+
+== Response Preparation ==
+recommender -> api: Return portfolio recommendation
+api -> frontend: JSON response with portfolio
+
+== Frontend Display ==
+frontend -> frontend: Parse portfolio data
+frontend -> frontend: Render PortfolioGeneration component
+frontend -> user: Display portfolio recommendations
+
+== Real-time Data Updates ==
+note over collectors: Background Process
+collectors -> db: Update daily prices
+collectors -> db: Collect news articles
+collectors -> db: Update fundamentals
+
+== Performance Monitoring ==
+user -> frontend: View Portfolio Performance
+frontend -> api: GET /portfolio_metrics
+api -> db: Query historical data
+db -> api: Return performance data
+api -> frontend: Portfolio metrics
+frontend -> user: Display performance charts
+
+== Rebalancing Workflow ==
+user -> frontend: Request Portfolio Rebalancing
+frontend -> api: POST /rebalance_portfolio
+api -> recommender: rebalance_portfolio(current_portfolio)
+recommender -> selector: Re-evaluate asset scores
+selector -> optimizer: Recalculate optimal weights
+optimizer -> recommender: Updated allocation
+recommender -> api: Rebalancing recommendations
+api -> frontend: Updated portfolio
+frontend -> user: Show rebalancing suggestions
+
+== Notification System ==
+note over api: Scheduled Background Tasks
+api -> db: Check portfolio performance
+db -> api: Performance alerts
+api -> frontend: Push notifications
+frontend -> user: Real-time alerts
+
+== Error Handling ==
+alt Portfolio Generation Fails
+    recommender -> api: Raise PortfolioGenerationError
+    api -> frontend: Error response with fallback data
+    frontend -> user: Show demo portfolio with warning
+end
+
+== Data Collection Monitoring ==
+admin -> api: GET /collector_status
+api -> db: Query CollectorRun table
+db -> api: Collection status
+api -> admin: System health report
+
+@enduml

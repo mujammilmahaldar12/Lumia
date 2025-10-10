@@ -1,0 +1,154 @@
+@startuml Lumia_Component_Diagram
+!theme amiga
+title Lumia Robo-Advisor - Component Architecture
+
+!define COMPONENT(name,desc) component name as "desc"
+!define INTERFACE(name,desc) interface name as "desc"
+!define DATABASE(name,desc) database name as "desc"
+
+package "Frontend Layer" {
+    COMPONENT(ReactApp, "React 18 Application\n(TypeScript)")
+    COMPONENT(UIComponents, "shadcn/ui Components\n(Tailwind CSS)")
+    COMPONENT(StateManagement, "React Context API\n(Global State)")
+    COMPONENT(AuthContext, "Authentication Context\n(Supabase Auth)")
+    COMPONENT(NotificationSystem, "Real-time Notifications\n(WebSocket)")
+    
+    package "React Components" {
+        COMPONENT(Dashboard, "Dashboard\n(Main Interface)")
+        COMPONENT(PortfolioGen, "Portfolio Generation\n(Risk Assessment)")
+        COMPONENT(PerformanceCharts, "Performance Analytics\n(Chart.js)")
+        COMPONENT(ProfileSettings, "User Profile\n(Settings Management)")
+        COMPONENT(AssetRecommendations, "Asset Analysis\n(Recommendations)")
+    }
+}
+
+package "API Layer" {
+    COMPONENT(FlaskAPI, "Flask API Server\n(RESTful Endpoints)")
+    COMPONENT(AuthMiddleware, "Authentication Middleware\n(JWT Validation)")
+    COMPONENT(ErrorHandler, "Error Handling\n(Global Exception Handler)")
+    COMPONENT(APIRoutes, "API Routes\n(/generate_portfolio, /assets)")
+}
+
+package "Business Logic Layer" {
+    package "RoboAdvisor Engine" {
+        COMPONENT(Recommender, "Portfolio Recommender\n(Main Orchestrator)")
+        COMPONENT(UserProfiler, "User Profiling\n(Risk Assessment)")
+        COMPONENT(AssetSelector, "Asset Selection\n(Scoring & Filtering)")
+        COMPONENT(Optimizer, "Portfolio Optimizer\n(Modern Portfolio Theory)")
+        COMPONENT(StrategyEngine, "Portfolio Strategy\n(Allocation Rules)")
+        COMPONENT(MetricsCalculator, "Advanced Metrics\n(Risk/Return Analysis)")
+    }
+    
+    package "Data Processing" {
+        COMPONENT(DataValidation, "Data Validation\n(Input Sanitization)")
+        COMPONENT(CurrencyConverter, "Currency Converter\n(Multi-currency Support)")
+        COMPONENT(PriceCalculator, "Price Calculator\n(Real-time Pricing)")
+        COMPONENT(NewsAnalyzer, "News Sentiment\n(NLP Analysis)")
+    }
+}
+
+package "Data Collection Layer" {
+    COMPONENT(MasterCollector, "Master Collector\n(Orchestrator)")
+    COMPONENT(StockCollector, "Stock Data Collector\n(Equity Markets)")
+    COMPONENT(CryptoCollector, "Crypto Data Collector\n(Digital Assets)")
+    COMPONENT(MFCollector, "Mutual Fund Collector\n(Fund Data)")
+    COMPONENT(ETFCollector, "ETF Data Collector\n(Exchange Traded Funds)")
+    COMPONENT(NewsCollector, "News Collector\n(Financial News)")
+}
+
+package "Data Layer" {
+    DATABASE(SupabaseDB, "Supabase PostgreSQL\n(Cloud Database)")
+    COMPONENT(SQLAlchemyORM, "SQLAlchemy ORM\n(Database Abstraction)")
+    COMPONENT(AlembicMigrations, "Alembic Migrations\n(Schema Versioning)")
+    
+    package "Database Models" {
+        COMPONENT(AssetModel, "Asset Model\n(Tradeable Instruments)")
+        COMPONENT(PriceModel, "Daily Price Model\n(Historical Prices)")
+        COMPONENT(FundamentalModel, "Fundamental Model\n(Financial Metrics)")
+        COMPONENT(NewsModel, "News Model\n(Articles & Sentiment)")
+        COMPONENT(PortfolioModel, "Portfolio Model\n(User Portfolios)")
+    }
+}
+
+package "External Services" {
+    COMPONENT(MarketDataAPI, "Market Data APIs\n(Yahoo Finance, Alpha Vantage)")
+    COMPONENT(NewsAPI, "News APIs\n(Financial News Sources)")
+    COMPONENT(SupabaseAuth, "Supabase Auth\n(Authentication Service)")
+    COMPONENT(SupabaseRealtime, "Supabase Realtime\n(Live Updates)")
+}
+
+' Frontend Internal Connections
+ReactApp --> UIComponents
+ReactApp --> StateManagement
+ReactApp --> AuthContext
+ReactApp --> NotificationSystem
+StateManagement --> Dashboard
+StateManagement --> PortfolioGen
+StateManagement --> PerformanceCharts
+StateManagement --> ProfileSettings
+StateManagement --> AssetRecommendations
+
+' Frontend to API Connections
+ReactApp --> FlaskAPI : "HTTPS/REST"
+AuthContext --> SupabaseAuth : "Authentication"
+NotificationSystem --> SupabaseRealtime : "WebSocket"
+
+' API Internal Connections
+FlaskAPI --> AuthMiddleware
+FlaskAPI --> ErrorHandler
+FlaskAPI --> APIRoutes
+
+' API to Business Logic
+APIRoutes --> Recommender
+APIRoutes --> UserProfiler
+APIRoutes --> AssetSelector
+APIRoutes --> DataValidation
+
+' Business Logic Internal Connections
+Recommender --> UserProfiler
+Recommender --> AssetSelector
+Recommender --> Optimizer
+Recommender --> StrategyEngine
+Recommender --> MetricsCalculator
+AssetSelector --> CurrencyConverter
+AssetSelector --> PriceCalculator
+Recommender --> NewsAnalyzer
+
+' Business Logic to Data
+Recommender --> SQLAlchemyORM
+AssetSelector --> SQLAlchemyORM
+UserProfiler --> SQLAlchemyORM
+
+' Data Collection Connections
+MasterCollector --> StockCollector
+MasterCollector --> CryptoCollector
+MasterCollector --> MFCollector
+MasterCollector --> ETFCollector
+MasterCollector --> NewsCollector
+
+' Data Collection to External Services
+StockCollector --> MarketDataAPI
+CryptoCollector --> MarketDataAPI
+NewsCollector --> NewsAPI
+
+' Data Collection to Database
+StockCollector --> SQLAlchemyORM
+CryptoCollector --> SQLAlchemyORM
+MFCollector --> SQLAlchemyORM
+ETFCollector --> SQLAlchemyORM
+NewsCollector --> SQLAlchemyORM
+
+' Database Layer Connections
+SQLAlchemyORM --> SupabaseDB
+AlembicMigrations --> SupabaseDB
+SQLAlchemyORM --> AssetModel
+SQLAlchemyORM --> PriceModel
+SQLAlchemyORM --> FundamentalModel
+SQLAlchemyORM --> NewsModel
+SQLAlchemyORM --> PortfolioModel
+
+' External Service to Database
+SupabaseAuth --> SupabaseDB
+SupabaseRealtime --> SupabaseDB
+
+@enduml

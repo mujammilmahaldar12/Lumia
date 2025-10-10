@@ -1,0 +1,261 @@
+@startuml Lumia_Class_Diagram
+!theme amiga
+title Lumia Robo-Advisor - Class Diagram
+
+package "Models" {
+    class Asset {
+        +id: Integer
+        +symbol: String
+        +name: String
+        +type: String
+        +subtype: String
+        +exchange: String
+        +country: String
+        +currency: String
+        +sector: String
+        +industry: String
+        +market_cap: BigInteger
+        +total_assets: BigInteger
+        +expense_ratio: Float
+        +dividend_yield: Float
+        +is_active: Boolean
+        +listing_date: TIMESTAMP
+        +delisting_date: TIMESTAMP
+        +description: Text
+        +website: String
+        +isin: String
+        +cusip: String
+        --
+        +__init__()
+        +__repr__()
+    }
+
+    class DailyPrice {
+        +id: Integer
+        +asset_id: Integer
+        +date: Date
+        +open: Float
+        +high: Float
+        +low: Float
+        +close: Float
+        +volume: BigInteger
+        +adjusted_close: Float
+        +currency: String
+        +created_at: TIMESTAMP
+        --
+        +__init__()
+        +calculate_returns()
+    }
+
+    class QuarterlyFundamental {
+        +id: Integer
+        +asset_id: Integer
+        +quarter: String
+        +year: Integer
+        +revenue: BigInteger
+        +net_income: BigInteger
+        +total_assets: BigInteger
+        +total_debt: BigInteger
+        +market_cap: BigInteger
+        +pe_ratio: Float
+        +pb_ratio: Float
+        +roe: Float
+        +debt_to_equity: Float
+        +current_ratio: Float
+        +quick_ratio: Float
+        --
+        +__init__()
+        +calculate_ratios()
+    }
+
+    class NewsArticle {
+        +id: Integer
+        +asset_id: Integer
+        +title: String
+        +content: Text
+        +source: String
+        +published_at: TIMESTAMP
+        +sentiment_score: Float
+        +asset_link: String
+        +category: String
+        +author: String
+        +url: String
+        --
+        +__init__()
+        +analyze_sentiment()
+    }
+
+    class CollectorRun {
+        +id: Integer
+        +collector_name: String
+        +run_date: Date
+        +status: String
+        +records_processed: Integer
+        +errors_count: Integer
+        +duration_seconds: Integer
+        +log_details: Text
+        +created_at: TIMESTAMP
+        --
+        +__init__()
+        +mark_completed()
+        +mark_failed()
+    }
+}
+
+package "RoboAdvisor" {
+    enum RiskType {
+        CONSERVATIVE
+        MODERATE
+        AGGRESSIVE
+        VERY_AGGRESSIVE
+    }
+
+    class UserProfile {
+        +capital: Float
+        +risk_score: Integer
+        +risk_type: RiskType
+        +years: Integer
+        +expected_return: Float
+        +exclusions: List[String]
+        +age_bracket: String
+        +investment_goal: String
+        +rebalancing_frequency: String
+        --
+        +__post_init__()
+        +to_dict(): Dict
+        +calculate_risk_capacity(): Float
+        +get_asset_preferences(): Dict
+    }
+
+    class PortfolioStrategy {
+        +risk_type: RiskType
+        +allocation: Dict
+        --
+        +get_strategic_allocation(): Dict
+        +get_sector_diversification(): Dict
+        +adjust_for_market_conditions(): Dict
+    }
+
+    class AssetSelector {
+        +db: Database
+        --
+        +select_top_assets(): List
+        +calculate_asset_score(): Float
+        +filter_by_criteria(): List
+        +apply_sector_diversification(): List
+    }
+
+    class Optimizer {
+        --
+        +calculate_portfolio_metrics(): Tuple
+        +optimize_portfolio(): Dict
+        +efficient_frontier(): List
+        +sharpe_ratio_optimization(): Dict
+        +minimum_variance_optimization(): Dict
+    }
+
+    class AdvancedMetrics {
+        --
+        +calculate_sharpe_ratio(): Float
+        +calculate_sortino_ratio(): Float
+        +calculate_var(): Float
+        +calculate_max_drawdown(): Float
+        +calculate_beta(): Float
+        +calculate_alpha(): Float
+    }
+
+    class Recommender {
+        +db: Database
+        --
+        +generate_portfolio(): Dict
+        +generate_summary(): String
+        +rebalance_portfolio(): Dict
+        +calculate_allocation_percentages(): Dict
+    }
+}
+
+package "Collectors" {
+    class MasterCollector {
+        +db: Database
+        --
+        +run_all_collectors(): Boolean
+        +schedule_collection(): None
+        +get_collection_status(): Dict
+    }
+
+    class StocksManager {
+        +api_key: String
+        --
+        +collect_stock_data(): Boolean
+        +update_prices(): Boolean
+        +fetch_fundamentals(): Boolean
+    }
+
+    class CryptoManager {
+        +api_endpoints: Dict
+        --
+        +collect_crypto_data(): Boolean
+        +update_crypto_prices(): Boolean
+        +fetch_market_cap(): Boolean
+    }
+
+    class MutualFundManager {
+        --
+        +collect_mf_data(): Boolean
+        +update_nav_prices(): Boolean
+        +fetch_fund_details(): Boolean
+    }
+
+    class ETFManager {
+        --
+        +collect_etf_data(): Boolean
+        +update_etf_prices(): Boolean
+        +fetch_holdings(): Boolean
+    }
+}
+
+package "API" {
+    class APIServer {
+        +app: Flask
+        +db: Database
+        --
+        +generate_portfolio(): Response
+        +get_assets(): Response
+        +get_portfolio_metrics(): Response
+        +health_check(): Response
+    }
+}
+
+' Relationships
+Asset ||--o{ DailyPrice : "has prices"
+Asset ||--o{ QuarterlyFundamental : "has fundamentals"
+Asset ||--o{ NewsArticle : "has news"
+
+UserProfile --> RiskType : "uses"
+UserProfile --> PortfolioStrategy : "determines"
+
+PortfolioStrategy --> AssetSelector : "guides"
+AssetSelector --> Asset : "selects"
+AssetSelector --> Optimizer : "provides to"
+
+Recommender --> UserProfile : "uses"
+Recommender --> AssetSelector : "uses"
+Recommender --> Optimizer : "uses"
+Recommender --> AdvancedMetrics : "calculates"
+
+MasterCollector --> StocksManager : "orchestrates"
+MasterCollector --> CryptoManager : "orchestrates"
+MasterCollector --> MutualFundManager : "orchestrates"
+MasterCollector --> ETFManager : "orchestrates"
+MasterCollector --> CollectorRun : "logs"
+
+StocksManager --> Asset : "populates"
+StocksManager --> DailyPrice : "updates"
+CryptoManager --> Asset : "populates"
+MutualFundManager --> Asset : "populates"
+ETFManager --> Asset : "populates"
+
+APIServer --> Recommender : "uses"
+APIServer --> Asset : "queries"
+
+@enduml
